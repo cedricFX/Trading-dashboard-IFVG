@@ -16,11 +16,36 @@
     .header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; color: #f1f5f9; }
     .header-sub { font-size: 11px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
 
+    /* WORLD CLOCKS */
+    .world-clock { display:flex; align-items:center; gap:8px; padding:6px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); }
+    .wc-flag { font-size:16px; }
+    .wc-time { font-size:14px; font-weight:800; font-variant-numeric:tabular-nums; color:#e2e8f0; }
+    .wc-label { font-size:9px; color:#475569; text-transform:uppercase; letter-spacing:0.06em; margin-top:1px; }
+    .wc-session { border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.06); }
+    .wc-session .wc-time { color:#10b981; }
+
+    /* SESSION COUNTDOWN BOX (in checklist) */
+    .session-box { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+    .sess-card { flex:1; min-width:140px; padding:14px 18px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); }
+    .sess-card.active { border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.06); }
+    .sess-card.warning { border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.06); animation:pulse-border 1.5s infinite; }
+    .sess-card.ended { border-color:rgba(244,63,94,0.3); background:rgba(244,63,94,0.04); opacity:0.6; }
+    .sess-card.upcoming { border-color:rgba(168,85,247,0.3); background:rgba(168,85,247,0.04); }
+    .sess-name { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#64748b; margin-bottom:6px; }
+    .sess-time { font-size:22px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; }
+    .sess-time.green { color:#10b981; }
+    .sess-time.orange { color:#f59e0b; }
+    .sess-time.red { color:#f43f5e; }
+    .sess-time.purple { color:#a78bfa; }
+    .sess-time.gray { color:#334155; }
+    .sess-sub { font-size:11px; color:#475569; margin-top:4px; }
+
     /* SWEEPER SELECTOR */
     .sweeper-btn { display:flex; align-items:center; gap:8px; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:700; border:1.5px solid #1e293b; background:rgba(255,255,255,0.02); color:#475569; cursor:pointer; transition:all 0.2s; }
     .sweeper-btn:hover { border-color:#334155; color:#94a3b8; }
     .sweeper-btn.active-dxy { border-color:rgba(6,182,212,0.5); background:rgba(6,182,212,0.08); color:#06b6d4; }
     .sweeper-btn.active-eurusd { border-color:rgba(16,185,129,0.5); background:rgba(16,185,129,0.08); color:#10b981; }
+    .sweeper-btn.active-same { border-color:rgba(251,191,36,0.5); background:rgba(251,191,36,0.08); color:#fbbf24; }
 
     /* MODE TOGGLE */
     .mode-toggle { display:flex; align-items:center; gap:0; border-radius:10px; overflow:hidden; border:1px solid #1e293b; margin-left:auto; }
@@ -186,6 +211,11 @@
     .filter-btn { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; border:1px solid #1e293b; background:transparent; color:#64748b; cursor:pointer; transition:all 0.15s; }
     .filter-btn.active { background:#1e293b; color:#e2e8f0; border-color:#334155; }
 
+    /* SL PIPS BUTTONS */
+    .sl-pip-btn { width:38px; height:38px; border-radius:8px; border:1.5px solid #1e293b; background:rgba(255,255,255,0.02); color:#475569; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.15s; }
+    .sl-pip-btn:hover { border-color:#334155; color:#94a3b8; }
+    .sl-pip-btn.active { border-color:#f43f5e; background:rgba(244,63,94,0.12); color:#f43f5e; }
+
     /* EMPTY */
     .empty { text-align:center; padding:60px 0; color:#334155; font-size:14px; }
     .empty-icon { font-size:40px; margin-bottom:12px; }
@@ -234,7 +264,23 @@
         <div class="header-sub">ICT / SMC · Asian Liquidity + IFVG</div>
       </div>
 
-      <!-- CLOCK -->
+      <!-- WORLD CLOCKS -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <div class="world-clock" id="clock-paris">
+          <span class="wc-flag">🇫🇷</span>
+          <div><div class="wc-time" id="wc-paris">--:--</div><div class="wc-label">Paris</div></div>
+        </div>
+        <div class="world-clock" id="clock-london">
+          <span class="wc-flag">🇬🇧</span>
+          <div><div class="wc-time" id="wc-london">--:--</div><div class="wc-label">Londres</div></div>
+        </div>
+        <div class="world-clock" id="clock-ny">
+          <span class="wc-flag">🗽</span>
+          <div><div class="wc-time" id="wc-ny">--:--</div><div class="wc-label">New York</div></div>
+        </div>
+      </div>
+
+      <!-- SESSION CLOCK (status badge) -->
       <div class="clock-wrap clock-green" id="session-clock">
         <span class="clock-time" id="clock-time">--:--:--</span>
         <span class="clock-label" id="clock-label">Session active</span>
@@ -295,6 +341,20 @@
       🚫 Limite journalière atteinte — <span id="daily-limit-msg"></span>
     </div>
 
+    <!-- SESSION COUNTDOWNS -->
+    <div class="session-box">
+      <div class="sess-card" id="sess-london">
+        <div class="sess-name">🇬🇧 Session Londres</div>
+        <div class="sess-time" id="sess-london-time">--:--</div>
+        <div class="sess-sub" id="sess-london-sub">07:00 → 11:00</div>
+      </div>
+      <div class="sess-card" id="sess-ny">
+        <div class="sess-name">🗽 Session New York</div>
+        <div class="sess-time" id="sess-ny-time">--:--</div>
+        <div class="sess-sub" id="sess-ny-sub">14:00 → 17:00</div>
+      </div>
+    </div>
+
     <!-- Sélecteur : qui sweep en premier ? -->
     <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
       <button class="sweeper-btn active-dxy" id="sw-dxy" onclick="setSweeper('dxy')">
@@ -302,6 +362,9 @@
       </button>
       <button class="sweeper-btn" id="sw-eurusd" onclick="setSweeper('eurusd')">
         <span style="font-size:13px;">💶</span> EURUSD en premier
+      </button>
+      <button class="sweeper-btn" id="sw-same" onclick="setSweeper('same')">
+        <span style="font-size:13px;">⚡</span> En même temps
       </button>
     </div>
 
@@ -351,7 +414,7 @@
           <div id="golden-badge" style="display:none;padding:4px 10px;border-radius:20px;background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(245,158,11,0.15));border:1px solid rgba(251,191,36,0.5);font-size:11px;font-weight:800;color:#fbbf24;letter-spacing:0.05em;white-space:nowrap;">⚡ GOLDEN SETUP</div>
           <div class="lock-icon" id="lock-second">🔒</div>
         </div>
-        <div id="second-panel" style="display:none;padding:12px 24px 16px;border-top:1px solid rgba(6,182,212,0.08);background:rgba(6,182,212,0.02);">
+        <div id="second-panel" style="display:none;padding:12px 24px 16px;border-top:1px solid rgba(6,182,212,0.08);background:rgba(6,182,212,0.02);" onclick="event.stopPropagation()">
           <div class="field-label" id="second-panel-label">Heure de la prise de liquidité EURUSD</div>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
             <input type="time" id="second-time" class="input" style="width:130px;" oninput="checkGolden()" />
@@ -409,8 +472,12 @@
     <div class="page-title">Prise de position</div>
     <div class="page-sub" id="pos-sub">Setup validé · EURUSD · Retest IFVG</div>
     <div class="form-grid">
+
+      <!-- Date / Heure entrée -->
       <div class="field"><div class="field-label">Date</div><input type="date" id="f-date" class="input" /></div>
-      <div class="field"><div class="field-label">Heure</div><input type="time" id="f-time" class="input" /></div>
+      <div class="field"><div class="field-label">Heure d'entrée</div><input type="time" id="f-time" class="input" /></div>
+
+      <!-- Direction / Résultat -->
       <div class="field"><div class="field-label">Direction</div>
         <div class="toggle-group">
           <button class="toggle-btn active-long" id="btn-long" onclick="setDirection('LONG')">▲ LONG</button>
@@ -424,10 +491,47 @@
           <button class="toggle-btn" id="btn-be" onclick="setResult('BE')">BE</button>
         </div>
       </div>
+
+      <!-- Prix / SL / TP -->
       <div class="field"><div class="field-label">Prix d'entrée</div><input type="number" step="0.00001" id="f-entry" class="input" placeholder="1.08450" oninput="calcRR()" /></div>
-      <div class="field"><div class="field-label">Stop Loss</div><input type="number" step="0.00001" id="f-sl" class="input" placeholder="1.08320" oninput="calcRR()" /></div>
+      <div class="field"><div class="field-label">Stop Loss (prix)</div><input type="number" step="0.00001" id="f-sl" class="input" placeholder="1.08320" oninput="calcRR()" /></div>
       <div class="field"><div class="field-label">Take Profit</div><input type="number" step="0.00001" id="f-tp" class="input" placeholder="1.08710" oninput="calcRR()" /></div>
       <div class="field"><div class="field-label">Risk/Reward (auto)</div><div class="rr-display" id="rr-display">Calculé automatiquement</div></div>
+
+      <!-- SL en pips (obligatoire 2–8) -->
+      <div class="field full-width" style="margin-top:6px;">
+        <div class="field-label">Taille du SL en pips <span style="color:#f43f5e;">*</span> <span style="color:#475569;font-weight:400;text-transform:none;letter-spacing:0;">(obligatoire · 2 à 8 pips)</span></div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="sl-pips-btns">
+            <button class="sl-pip-btn" onclick="setSlPips(2)">2</button>
+            <button class="sl-pip-btn" onclick="setSlPips(3)">3</button>
+            <button class="sl-pip-btn" onclick="setSlPips(4)">4</button>
+            <button class="sl-pip-btn" onclick="setSlPips(5)">5</button>
+            <button class="sl-pip-btn" onclick="setSlPips(6)">6</button>
+            <button class="sl-pip-btn" onclick="setSlPips(7)">7</button>
+            <button class="sl-pip-btn" onclick="setSlPips(8)">8</button>
+          </div>
+          <input type="number" id="f-sl-pips" class="input" style="width:90px;" min="2" max="8" step="0.1" placeholder="pips" oninput="onSlPipsInput()" />
+          <div id="sl-pips-display" style="font-size:12px;color:#475569;"></div>
+        </div>
+      </div>
+
+      <!-- Heure de fin -->
+      <div class="field"><div class="field-label">Heure de fin du trade</div><input type="time" id="f-time-end" class="input" oninput="calcDuration()" /></div>
+      <div class="field"><div class="field-label">Durée (auto)</div>
+        <div class="rr-display" id="duration-display" style="color:#334155;">Calculée automatiquement</div>
+      </div>
+
+      <!-- Screenshot -->
+      <div class="field full-width" style="margin-top:6px;">
+        <div class="field-label">Lien screenshot</div>
+        <div style="position:relative;">
+          <input type="url" id="f-screenshot" class="input" placeholder="https://www.tradingview.com/x/..." style="padding-right:80px;" />
+          <button onclick="openScreenshot()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 10px;border-radius:6px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4;font-size:11px;font-weight:700;cursor:pointer;">Ouvrir ↗</button>
+        </div>
+      </div>
+
+      <!-- Notes -->
       <div class="field full-width mt-14"><div class="field-label">Notes</div><textarea id="f-notes" class="input" rows="3" placeholder="Contexte du trade, observations, émotions..."></textarea></div>
     </div>
     <button class="btn-submit" id="btn-submit" onclick="submitTrade()">Enregistrer le trade</button>
@@ -466,6 +570,10 @@
       <div class="aplus-stat" style="margin-top:10px;border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.04);">
         <div><div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Golden Setup</div><div style="font-size:13px;color:#fbbf24;font-weight:600;">Prise de liquidité EURUSD à 8h</div></div>
         <div style="font-size:28px;font-weight:800;color:#fbbf24;" id="s-golden">0</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">
+        <div class="stat-card"><div class="stat-label">SL moyen</div><div class="stat-value" id="s-sl-pips" style="color:#f43f5e;">—</div><div style="font-size:11px;color:#475569;margin-top:4px;">pips</div></div>
+        <div class="stat-card"><div class="stat-label">Durée moyenne</div><div class="stat-value" id="s-duration" style="color:#06b6d4;">—</div><div style="font-size:11px;color:#475569;margin-top:4px;">par trade</div></div>
       </div>
       <div class="chart-box">
         <div class="chart-title">Répartition des résultats</div>
@@ -539,30 +647,36 @@ window.addEventListener('DOMContentLoaded', () => {
 function setSweeper(s) {
   if (timerState !== 'idle') resetAll();
   sweeper = s;
-  timerDuration = s === 'dxy' ? TIMER_DXY_FIRST : TIMER_EURUSD_FIRST;
+  timerDuration = s === 'eurusd' ? TIMER_EURUSD_FIRST : 25 * 60;
   remaining = timerDuration;
-  // Buttons
   document.getElementById('sw-dxy').className    = 'sweeper-btn' + (s === 'dxy'    ? ' active-dxy'    : '');
   document.getElementById('sw-eurusd').className = 'sweeper-btn' + (s === 'eurusd' ? ' active-eurusd' : '');
-  // Labels first condition
+  document.getElementById('sw-same').className   = 'sweeper-btn' + (s === 'same'   ? ' active-same'   : '');
+
   if (s === 'dxy') {
-    document.getElementById('lbl-first').textContent  = 'DXY — Prise de liquidité Asian';
-    document.getElementById('desc-first').textContent = 'Renseigne l\'heure du sweep DXY pour démarrer le timer 25 min';
+    document.getElementById('lbl-first').textContent   = 'DXY — Prise de liquidité Asian';
+    document.getElementById('desc-first').textContent  = 'Renseigne l\'heure du sweep DXY pour démarrer le timer 25 min';
     document.getElementById('first-panel-label').textContent = 'Heure du sweep DXY';
-    document.getElementById('lbl-second').textContent = 'EURUSD — Prise de liquidité Asian';
+    document.getElementById('lbl-second').textContent  = 'EURUSD — Prise de liquidité Asian';
     document.getElementById('desc-second').textContent = 'Valide dans la fenêtre des 25 min après le sweep DXY';
     document.getElementById('second-panel-label').textContent = 'Heure de la prise de liquidité EURUSD';
     document.getElementById('timer-display').textContent = '25:00';
-  } else {
-    document.getElementById('lbl-first').textContent  = 'EURUSD — Prise de liquidité Asian';
-    document.getElementById('desc-first').textContent = 'Renseigne l\'heure du sweep EURUSD pour démarrer le timer 15 min';
+  } else if (s === 'eurusd') {
+    document.getElementById('lbl-first').textContent   = 'EURUSD — Prise de liquidité Asian';
+    document.getElementById('desc-first').textContent  = 'Renseigne l\'heure du sweep EURUSD pour démarrer le timer 15 min';
     document.getElementById('first-panel-label').textContent = 'Heure du sweep EURUSD';
-    document.getElementById('lbl-second').textContent = 'DXY — Prise de liquidité Asian';
+    document.getElementById('lbl-second').textContent  = 'DXY — Prise de liquidité Asian';
     document.getElementById('desc-second').textContent = 'Valide dans la fenêtre des 15 min après le sweep EURUSD';
     document.getElementById('second-panel-label').textContent = 'Heure de la prise de liquidité DXY';
     document.getElementById('timer-display').textContent = '15:00';
+  } else { // same
+    document.getElementById('lbl-first').textContent   = 'DXY + EURUSD — Prise de liquidité simultanée';
+    document.getElementById('desc-first').textContent  = 'Les deux sweepent en même temps — timer 25 min';
+    document.getElementById('first-panel-label').textContent = 'Heure du sweep simultané';
+    document.getElementById('lbl-second').textContent  = 'FVG validé après le sweep';
+    document.getElementById('desc-second').textContent = 'FVG entre 1.3 et 6 pips, formé sur plusieurs bougies';
+    document.getElementById('timer-display').textContent = '25:00';
   }
-  // Golden badge only relevant when EURUSD is second (DXY first mode)
   updateGoldenHintVisibility();
 }
 
@@ -590,68 +704,97 @@ function setMode(mode) {
 }
 
 // ═══════════════════════════════════
-//  CLOCK
+//  CLOCK + WORLD CLOCKS + SESSIONS
 // ═══════════════════════════════════
 function startClock() { updateClock(); clockInterval = setInterval(updateClock, 1000); }
+
+function fmt2(n) { return String(n).padStart(2,'0'); }
+function isDST(date) {
+  const jan = new Date(date.getFullYear(),0,1).getTimezoneOffset();
+  const jul = new Date(date.getFullYear(),6,1).getTimezoneOffset();
+  return date.getTimezoneOffset() < Math.max(jan,jul);
+}
+function offsetTime(date, offsetMin) {
+  const d = new Date(date.getTime() + offsetMin*60000);
+  return fmt2(d.getHours())+':'+fmt2(d.getMinutes());
+}
 
 function updateClock() {
   const now = new Date();
   const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
-  const timeStr = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-  const totalMin = h * 60 + m;
+  const timeStr = fmt2(h)+':'+fmt2(m)+':'+fmt2(s);
+  const totalMin = h*60+m;
   const clock = document.getElementById('session-clock');
   const clockLabel = document.getElementById('clock-label');
   const warning = document.getElementById('session-warning');
   document.getElementById('clock-time').textContent = timeStr;
 
-  // NY session: 13:30 → 17:00
-  const nyStart = 13*60+30, nyEnd = 17*60;
-  const nyCD = document.getElementById('ny-countdown');
-  const nyAct = document.getElementById('ny-active');
-  const nyET = document.getElementById('ny-end-text');
-  const nyCDT = document.getElementById('ny-countdown-text');
-  if (totalMin < nyStart) {
-    const secLeft = (nyStart - totalMin)*60 - s;
-    nyCDT.textContent = fmtCountdown(secLeft);
-    nyCD.style.display = 'flex'; nyAct.style.display = 'none';
-  } else if (totalMin < nyEnd) {
-    const secLeft = (nyEnd - totalMin)*60 - s;
-    nyET.textContent = 'fin dans '+fmtCountdown(secLeft);
-    nyCD.style.display = 'none'; nyAct.style.display = 'flex';
-  } else {
-    nyCD.style.display = 'none'; nyAct.style.display = 'none';
-  }
+  // World clocks (Paris is local)
+  const londonOffMin = isDST(now) ? 0 : -60;
+  const nyOffMin = isDST(now) ? -5*60 : -6*60;
+  const londonStr = offsetTime(now, londonOffMin);
+  const nyStr = offsetTime(now, nyOffMin);
+  document.getElementById('wc-paris').textContent  = fmt2(h)+':'+fmt2(m);
+  document.getElementById('wc-london').textContent = londonStr;
+  document.getElementById('wc-ny').textContent     = nyStr;
 
-  // Daily counter (réel only)
+  // Session boxes (all times in Paris)
+  const londonStart=7*60, londonEnd=11*60, nyStart=14*60, nyEnd=17*60;
+  updateSessBox('london', totalMin, s, londonStart, londonEnd);
+  updateSessBox('ny',     totalMin, s, nyStart,     nyEnd);
+
+  // NY header badge
+  const nyCD=document.getElementById('ny-countdown'), nyAct=document.getElementById('ny-active');
+  if (totalMin < nyStart) {
+    document.getElementById('ny-countdown-text').textContent = fmtCountdown((nyStart-totalMin)*60-s);
+    nyCD.style.display='flex'; nyAct.style.display='none';
+  } else if (totalMin < nyEnd) {
+    document.getElementById('ny-end-text').textContent = 'fin dans '+fmtCountdown((nyEnd-totalMin)*60-s);
+    nyCD.style.display='none'; nyAct.style.display='flex';
+  } else { nyCD.style.display='none'; nyAct.style.display='none'; }
+
   updateDailyCounter();
 
-  if (currentMode === 'backtest') {
-    clock.className = 'clock-wrap clock-green';
-    clockLabel.textContent = '🔬 Mode Backtest';
-    warning.style.display = 'none';
-    return;
+  if (currentMode==='backtest') {
+    clock.className='clock-wrap clock-green'; clockLabel.textContent='🔬 Mode Backtest';
+    warning.style.display='none'; return;
   }
-  // London session warnings
-  if (totalMin >= 11*60 && totalMin < nyStart) {
-    clock.className = 'clock-wrap clock-orange';
-    clockLabel.textContent = '⏸ Entre sessions';
-    warning.className = 'sw-orange'; warning.style.display = 'flex';
-    warning.innerHTML = '⏸ <span>Hors killzone Londres. Session NY ouvre à 13h30.</span>';
-  } else if (totalMin >= nyEnd) {
-    clock.className = 'clock-wrap clock-red';
-    clockLabel.textContent = '⛔ Sessions terminées';
-    warning.className = 'sw-red'; warning.style.display = 'flex';
-    warning.innerHTML = '🔴 <span>Sessions terminées pour aujourd\'hui.</span>';
-  } else if (totalMin >= 10*60+30 && totalMin < 11*60) {
-    clock.className = 'clock-wrap clock-orange';
-    const ml = (11*60)-totalMin;
-    clockLabel.textContent = '⚠️ Fin Londres dans '+ml+'min';
-    warning.className = 'sw-orange'; warning.style.display = 'flex';
-    warning.innerHTML = '⚠️ <span>Fin session Londres dans <strong>'+ml+' min</strong>. Session NY à 13h30.</span>';
+  if (totalMin>=londonEnd && totalMin<nyStart) {
+    clock.className='clock-wrap clock-orange'; clockLabel.textContent='⏸ Entre sessions';
+    warning.className='sw-orange'; warning.style.display='flex';
+    warning.innerHTML='⏸ <span>Hors killzone. Session NY ouvre à 14h00.</span>';
+  } else if (totalMin>=nyEnd) {
+    clock.className='clock-wrap clock-red'; clockLabel.textContent='⛔ Sessions terminées';
+    warning.className='sw-red'; warning.style.display='flex';
+    warning.innerHTML='🔴 <span>Sessions terminées pour aujourd\'hui.</span>';
+  } else if ((totalMin>=londonEnd-30&&totalMin<londonEnd)||(totalMin>=nyEnd-30&&totalMin<nyEnd)) {
+    const isLon=totalMin<londonEnd, end=isLon?londonEnd:nyEnd, ml=end-totalMin;
+    clock.className='clock-wrap clock-orange'; clockLabel.textContent='⚠️ Fin session dans '+ml+'min';
+    warning.className='sw-orange'; warning.style.display='flex';
+    warning.innerHTML='⚠️ <span>Fin de session dans <strong>'+ml+' min</strong> — trade plus risqué.</span>';
   } else {
-    clock.className = 'clock-wrap clock-green';
-    clockLabel.textContent = totalMin >= nyStart ? '🗽 Session NY active' : 'Session Londres active';
-    warning.style.display = 'none';
+    clock.className='clock-wrap clock-green';
+    clockLabel.textContent = totalMin>=nyStart ? '🗽 Session NY' : '🇬🇧 Session Londres';
+    warning.style.display='none';
+  }
+}
+
+function updateSessBox(id, totalMin, s, start, end) {
+  const card=document.getElementById('sess-'+id);
+  const timeEl=document.getElementById('sess-'+id+'-time');
+  const subEl=document.getElementById('sess-'+id+'-sub');
+  if (totalMin<start) {
+    card.className='sess-card upcoming'; timeEl.className='sess-time purple';
+    timeEl.textContent=fmtCountdown((start-totalMin)*60-s); subEl.textContent='Ouvre dans…';
+  } else if (totalMin<end-30) {
+    card.className='sess-card active'; timeEl.className='sess-time green';
+    timeEl.textContent=fmtCountdown((end-totalMin)*60-s); subEl.textContent='Ferme dans…';
+  } else if (totalMin<end) {
+    card.className='sess-card warning'; timeEl.className='sess-time orange';
+    timeEl.textContent=fmtCountdown((end-totalMin)*60-s); subEl.textContent='⚠️ Fin imminente';
+  } else {
+    card.className='sess-card ended'; timeEl.className='sess-time gray';
+    timeEl.textContent='Fermée'; subEl.textContent=(id==='london'?'07:00→11:00':'14:00→17:00');
   }
 }
 
@@ -730,24 +873,36 @@ function nowSec() { const n = new Date(); return n.getHours()*3600+n.getMinutes(
 function fmtCountdown(sec) { return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0'); }
 
 function onFirstTimeChange() {
-  document.getElementById('btn-start').disabled = !document.getElementById('first-time').value;
+  const val = document.getElementById('first-time').value;
+  document.getElementById('btn-start').disabled = !val;
+  if (!val) return;
   if (timerState !== 'idle') resetAll();
+  // In backtest: auto-start as soon as time is entered
+  if (currentMode === 'backtest') {
+    setTimeout(startTimer, 0);
+  }
 }
 
 function startTimer() {
   const sweepStr = document.getElementById('first-time').value;
   if (!sweepStr) return;
 
-  // In real mode, check if sweep time is within killzone (07:00–11:00)
+  // In real mode, validate killzone (07:00–11:00 or 14:00–17:00)
   if (currentMode === 'real') {
-    const sweepH = parseInt(sweepStr.split(':')[0]);
-    if (sweepH < 7 || sweepH >= 11) {
-      alert('⛔ En mode Réel, le sweep doit être dans la killzone (07h–11h).');
+    const [sh, sm] = sweepStr.split(':').map(Number);
+    const sweepMin = sh * 60 + sm;
+    const inLondon = sweepMin >= 7*60 && sweepMin < 11*60;
+    const inNY     = sweepMin >= 14*60 && sweepMin < 17*60;
+    if (!inLondon && !inNY) {
+      alert('⛔ En mode Réel, le sweep doit être dans une killzone (07h–11h ou 14h–17h).');
       return;
     }
   }
 
-  const elapsed = nowSec() - timeStrToSec(sweepStr);
+  // In backtest: compute elapsed from entered sweep time vs now
+  // but allow any hour — just start the countdown from the entered time
+  const sweepSec = timeStrToSec(sweepStr);
+  const elapsed = currentMode === 'backtest' ? 0 : (nowSec() - sweepSec);
   const left = timerDuration - elapsed;
   if (left <= 0) { expireTimer(); return; }
   remaining = Math.floor(left);
@@ -1004,54 +1159,6 @@ function setMode(mode) {
 }
 
 // ═══════════════════════════════════
-//  CLOCK + SESSION WARNING
-// ═══════════════════════════════════
-function startClock() {
-  updateClock();
-  clockInterval = setInterval(updateClock, 1000);
-}
-
-function updateClock() {
-  const now = new Date();
-  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
-  const timeStr = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-  const totalMin = h * 60 + m;
-  const clock = document.getElementById('session-clock');
-  const clockTime = document.getElementById('clock-time');
-  const clockLabel = document.getElementById('clock-label');
-  const warning = document.getElementById('session-warning');
-  clockTime.textContent = timeStr;
-
-  // En backtest : horloge toujours verte, aucun warning
-  if (currentMode === 'backtest') {
-    clock.className = 'clock-wrap clock-green';
-    clockLabel.textContent = '🔬 Mode Backtest';
-    warning.style.display = 'none';
-    return;
-  }
-
-  // En réel : color logic normale
-  if (totalMin >= 11 * 60) {
-    clock.className = 'clock-wrap clock-red';
-    clockLabel.textContent = '⛔ Session terminée';
-    warning.className = 'sw-red';
-    warning.style.display = 'flex';
-    warning.innerHTML = '🔴 <span>Il est ' + timeStr.slice(0,5) + ' — Session terminée, le trade est très risqué.</span>';
-  } else if (totalMin >= 10 * 60 + 30) {
-    clock.className = 'clock-wrap clock-orange';
-    const minsLeft = (11 * 60) - totalMin;
-    clockLabel.textContent = '⚠️ Fin de session dans ' + minsLeft + 'min';
-    warning.className = 'sw-orange';
-    warning.style.display = 'flex';
-    warning.innerHTML = '⚠️ <span>Approche de 11h00 — Trade plus risqué, sois vigilant. Fin de session dans <strong>' + minsLeft + ' min</strong>.</span>';
-  } else {
-    clock.className = 'clock-wrap clock-green';
-    clockLabel.textContent = 'Session active';
-    warning.style.display = 'none';
-  }
-}
-
-// ═══════════════════════════════════
 //  TABS
 // ═══════════════════════════════════
 function showTab(tab) {
@@ -1068,6 +1175,8 @@ function showTab(tab) {
 // ═══════════════════════════════════
 //  FORM
 // ═══════════════════════════════════
+let slPips = null;
+
 function setDirection(d) {
   direction = d;
   document.getElementById('btn-long').className = 'toggle-btn'+(d==='LONG'?' active-long':'');
@@ -1079,6 +1188,32 @@ function setResult(r) {
   document.getElementById('btn-loss').className = 'toggle-btn'+(r==='LOSS'?' active-loss':'');
   document.getElementById('btn-be').className = 'toggle-btn'+(r==='BE'?' active-be':'');
 }
+
+function setSlPips(v) {
+  slPips = v;
+  document.getElementById('f-sl-pips').value = v;
+  document.querySelectorAll('.sl-pip-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.textContent) === v);
+  });
+  updateSlPipsDisplay(v);
+}
+function onSlPipsInput() {
+  const v = parseFloat(document.getElementById('f-sl-pips').value);
+  slPips = (!isNaN(v) && v >= 2 && v <= 8) ? v : null;
+  document.querySelectorAll('.sl-pip-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.textContent) === v);
+  });
+  updateSlPipsDisplay(v);
+}
+function updateSlPipsDisplay(v) {
+  const el = document.getElementById('sl-pips-display');
+  if (isNaN(v) || v < 2 || v > 8) {
+    el.textContent = '⚠️ Entre 2 et 8 pips'; el.style.color = '#f43f5e';
+  } else {
+    el.textContent = '✓ ' + v + ' pip' + (v > 1 ? 's' : ''); el.style.color = '#10b981';
+  }
+}
+
 function calcRR() {
   const en = parseFloat(document.getElementById('f-entry').value);
   const sl = parseFloat(document.getElementById('f-sl').value);
@@ -1090,39 +1225,77 @@ function calcRR() {
   } else { el.textContent = 'Calculé automatiquement'; el.classList.remove('has-value'); el.dataset.rr = ''; }
 }
 
+function calcDuration() {
+  const start = document.getElementById('f-time').value;
+  const end = document.getElementById('f-time-end').value;
+  const el = document.getElementById('duration-display');
+  if (!start || !end) { el.textContent = 'Calculée automatiquement'; el.style.color = '#334155'; el.classList.remove('has-value'); return; }
+  const [sh,sm] = start.split(':').map(Number);
+  const [eh,em] = end.split(':').map(Number);
+  let diff = (eh*60+em) - (sh*60+sm);
+  if (diff < 0) diff += 24*60;
+  const h = Math.floor(diff/60), m = diff%60;
+  const txt = h > 0 ? `${h}h${String(m).padStart(2,'0')}` : `${m} min`;
+  el.textContent = txt; el.style.color = '#06b6d4'; el.classList.add('has-value');
+  el.dataset.duration = diff;
+}
+
+function openScreenshot() {
+  const url = document.getElementById('f-screenshot').value;
+  if (url) window.open(url, '_blank');
+}
+
 function submitTrade() {
   if (!document.getElementById('f-entry').value) { document.getElementById('f-entry').focus(); return; }
-  if (isDailyLimitReached()) {
-    alert('🚫 Limite journalière atteinte en mode Réel. Reviens demain !');
+  if (slPips === null) {
+    document.getElementById('sl-pips-display').textContent = '⚠️ Champ obligatoire !';
+    document.getElementById('sl-pips-display').style.color = '#f43f5e';
+    document.getElementById('f-sl-pips').focus();
     return;
   }
+  if (isDailyLimitReached()) { alert('🚫 Limite journalière atteinte en mode Réel. Reviens demain !'); return; }
+  const durEl = document.getElementById('duration-display');
   const trade = {
     id: Date.now(),
     mode: currentMode,
     date: document.getElementById('f-date').value,
     time: document.getElementById('f-time').value,
+    timeEnd: document.getElementById('f-time-end').value,
+    duration: durEl.dataset.duration || '',
     direction, result,
     entry: document.getElementById('f-entry').value,
     sl: document.getElementById('f-sl').value,
     tp: document.getElementById('f-tp').value,
     rr: document.getElementById('rr-display').dataset.rr || '',
+    slPips: slPips,
+    screenshot: document.getElementById('f-screenshot').value,
     notes: document.getElementById('f-notes').value,
     aplus: aplussActive,
     golden: goldenActive,
     checklist: {...checks},
+    sweeper: sweeper,
   };
   trades.unshift(trade);
   localStorage.setItem('trading-trades', JSON.stringify(trades));
   const btn = document.getElementById('btn-submit');
   btn.textContent = '✓ Trade enregistré !'; btn.classList.add('saved');
   setTimeout(() => { btn.textContent = 'Enregistrer le trade'; btn.classList.remove('saved'); }, 2000);
+  // Reset form
   const now = new Date();
   document.getElementById('f-date').value = now.toISOString().slice(0,10);
   document.getElementById('f-time').value = now.toTimeString().slice(0,5);
+  document.getElementById('f-time-end').value = '';
   document.getElementById('f-entry').value = '';
   document.getElementById('f-sl').value = '';
   document.getElementById('f-tp').value = '';
+  document.getElementById('f-screenshot').value = '';
   document.getElementById('f-notes').value = '';
+  document.getElementById('f-sl-pips').value = '';
+  document.getElementById('sl-pips-display').textContent = '';
+  document.getElementById('duration-display').textContent = 'Calculée automatiquement';
+  document.getElementById('duration-display').style.color = '#334155';
+  document.querySelectorAll('.sl-pip-btn').forEach(b => b.classList.remove('active'));
+  slPips = null;
   calcRR(); setDirection('LONG'); setResult('WIN'); resetAll();
   updateTabBadge(); refreshStats(); updateDailyCounter();
 }
@@ -1148,6 +1321,13 @@ function refreshStats() {
   const shorts = data.filter(t => t.direction==='SHORT').length;
   const aplus = data.filter(t => t.aplus).length;
   const golden = data.filter(t => t.golden).length;
+  const avgSlPips = data.filter(t => t.slPips).length > 0
+    ? (data.reduce((a,t) => a+(parseFloat(t.slPips)||0), 0) / data.filter(t=>t.slPips).length).toFixed(1)
+    : '—';
+  const durTrades = data.filter(t => t.duration);
+  const avgDuration = durTrades.length > 0
+    ? Math.round(durTrades.reduce((a,t) => a+(parseInt(t.duration)||0), 0) / durTrades.length)
+    : null;
   const avgRR = total > 0 ? (data.reduce((a,t) => a+(parseFloat(t.rr)||0), 0)/total).toFixed(2) : '—';
   const winrate = total > 0 ? ((wins/total)*100).toFixed(1)+'%' : '—';
   document.getElementById('stats-sub').textContent = total > 0 ? `Basé sur ${total} trade${total>1?'s':''} — filtre : ${statsFilter==='all'?'tous':statsFilter}` : 'Aucun trade enregistré pour l\'instant';
@@ -1163,6 +1343,13 @@ function refreshStats() {
   document.getElementById('s-short').textContent = shorts;
   document.getElementById('s-aplus').textContent = aplus;
   document.getElementById('s-golden').textContent = golden;
+  document.getElementById('s-sl-pips').textContent = avgSlPips;
+  if (avgDuration !== null) {
+    const h = Math.floor(avgDuration/60), m = avgDuration%60;
+    document.getElementById('s-duration').textContent = h > 0 ? `${h}h${String(m).padStart(2,'0')}` : `${m}min`;
+  } else {
+    document.getElementById('s-duration').textContent = '—';
+  }
   document.getElementById('b-wins').textContent = wins;
   document.getElementById('b-losses').textContent = losses;
   document.getElementById('b-be').textContent = be;
@@ -1199,6 +1386,14 @@ function refreshJournal() {
     : '<span class="mode-tag mode-tag-bt">BACKTEST</span>';
   const apluspTag = t => t.aplus ? '<span style="font-size:11px;color:#a78bfa;font-weight:700;margin-left:6px;">⭐ A++</span>' : '';
   const goldenTag = t => t.golden ? '<span style="font-size:11px;color:#fbbf24;font-weight:700;margin-left:6px;">⚡ GOLDEN</span>' : '';
+  const screenshotTag = t => t.screenshot ? `<a href="${t.screenshot}" target="_blank" style="font-size:11px;color:#06b6d4;font-weight:600;margin-left:6px;text-decoration:none;">📸 Screenshot ↗</a>` : '';
+  const durationStr = t => {
+    if (!t.duration) return '';
+    const d = parseInt(t.duration);
+    const h = Math.floor(d/60), m = d%60;
+    return ' · ⏱ '+(h > 0 ? `${h}h${String(m).padStart(2,'0')}` : `${m}min`);
+  };
+  const slPipsStr = t => t.slPips ? ` · SL: ${t.slPips}pips` : '';
   list.innerHTML = data.map(t => `
     <div class="trade-card" style="border:1px solid ${rc(t)}22;background:${rc(t)}08;">
       <div class="result-badge" style="background:${rc(t)}22;color:${rc(t)};">${t.result}</div>
@@ -1209,8 +1404,9 @@ function refreshJournal() {
           ${apluspTag(t)}
           ${goldenTag(t)}
         </div>
-        <div class="trade-meta">${t.date} ${t.time}${t.entry?' · Entrée : '+t.entry:''}${t.sl?' · SL : '+t.sl:''}${t.tp?' · TP : '+t.tp:''}</div>
+        <div class="trade-meta">${t.date} ${t.time}${t.timeEnd?' → '+t.timeEnd:''}${durationStr(t)}${t.entry?' · Entrée : '+t.entry:''}${t.sl?' · SL : '+t.sl:''}${slPipsStr(t)}${t.tp?' · TP : '+t.tp:''}</div>
         ${t.notes?`<div class="trade-notes">${t.notes}</div>`:''}
+        <div style="margin-top:4px;">${screenshotTag(t)}</div>
       </div>
       <div style="font-size:10px;color:#334155;text-align:right;">${Object.values(t.checklist||{}).filter(Boolean).length}/4 ✓</div>
       <button class="delete-btn" onclick="askDelete(${t.id})">🗑️ Suppr.</button>
