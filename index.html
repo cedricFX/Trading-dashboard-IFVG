@@ -6,295 +6,277 @@
   <title>EURUSD · Liquidity Journal</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { min-height: 100vh; background: linear-gradient(135deg, #0a0f1e 0%, #0d1529 60%, #0a1020 100%); font-family: 'Inter', 'Segoe UI', sans-serif; color: #e2e8f0; }
 
-    body {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #0a0f1e 0%, #0d1529 60%, #0a1020 100%);
-      font-family: 'Inter', 'Segoe UI', sans-serif;
-      color: #e2e8f0;
-    }
-
-    /* ── HEADER ── */
-    #header {
-      border-bottom: 1px solid rgba(6,182,212,0.15);
-      background: rgba(6,182,212,0.03);
-      backdrop-filter: blur(8px);
-      position: sticky; top: 0; z-index: 10;
-    }
-    .header-inner {
-      max-width: 900px; margin: 0 auto; padding: 0 24px;
-    }
-    .header-top {
-      display: flex; align-items: center; gap: 12; padding: 18px 0 0;
-    }
-    .logo {
-      width: 36px; height: 36px; border-radius: 8px;
-      background: linear-gradient(135deg, #06b6d4, #3b82f6);
-      display: flex; align-items: center; justify-content: center; font-size: 18px;
-      flex-shrink: 0;
-    }
+    /* HEADER */
+    #header { border-bottom: 1px solid rgba(6,182,212,0.15); background: rgba(6,182,212,0.03); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 10; }
+    .header-inner { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+    .header-top { display: flex; align-items: center; gap: 12px; padding: 14px 0 0; flex-wrap: wrap; }
+    .logo { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg,#06b6d4,#3b82f6); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
     .header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; color: #f1f5f9; }
     .header-sub { font-size: 11px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
-    #timer-badge {
-      margin-left: auto; display: none; align-items: center; gap: 8px;
-      padding: 6px 14px; border-radius: 20px;
-    }
-    .badge-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      animation: blink 1s infinite;
-    }
-    #timer-badge-text { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
-    #timer-badge-label { font-size: 10px; color: #64748b; }
-    #expired-badge {
-      margin-left: auto; display: none;
-      padding: 6px 14px; border-radius: 20px;
-      border: 1px solid rgba(244,63,94,0.4); background: rgba(244,63,94,0.1);
-      font-size: 12px; font-weight: 700; color: #f43f5e;
-    }
 
-    /* ── TABS ── */
-    .tabs { display: flex; gap: 0; margin-top: 16px; }
-    .tab-btn {
-      padding: 10px 20px; font-size: 14px; font-weight: 600; letter-spacing: 0.02em;
-      background: transparent; border: none; border-bottom: 2px solid transparent;
-      color: #64748b; cursor: pointer; transition: all 0.2s; white-space: nowrap;
-    }
-    .tab-btn:hover { color: #e2e8f0; }
-    .tab-btn.active { border-bottom-color: #06b6d4; color: #06b6d4; }
-    .tab-badge {
-      margin-left: 6px; border-radius: 10px; font-size: 10px;
-      font-weight: 700; padding: 1px 6px; display: inline-block; vertical-align: middle;
-    }
+    /* SWEEPER SELECTOR */
+    .sweeper-btn { display:flex; align-items:center; gap:8px; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:700; border:1.5px solid #1e293b; background:rgba(255,255,255,0.02); color:#475569; cursor:pointer; transition:all 0.2s; }
+    .sweeper-btn:hover { border-color:#334155; color:#94a3b8; }
+    .sweeper-btn.active-dxy { border-color:rgba(6,182,212,0.5); background:rgba(6,182,212,0.08); color:#06b6d4; }
+    .sweeper-btn.active-eurusd { border-color:rgba(16,185,129,0.5); background:rgba(16,185,129,0.08); color:#10b981; }
 
-    /* ── CONTENT ── */
-    .content { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
-    .page { display: none; }
-    .page.active { display: block; }
+    /* MODE TOGGLE */
+    .mode-toggle { display:flex; align-items:center; gap:0; border-radius:10px; overflow:hidden; border:1px solid #1e293b; margin-left:auto; }
+    .mode-btn { padding:8px 16px; font-size:12px; font-weight:800; letter-spacing:0.05em; border:none; cursor:pointer; transition:all 0.2s; background:transparent; color:#475569; }
+    .mode-btn.active-bt { background:linear-gradient(135deg,#8b5cf6,#6d28d9); color:#fff; }
+    .mode-btn.active-real { background:linear-gradient(135deg,#f59e0b,#d97706); color:#0a0f1e; }
+    .mode-tag { font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; letter-spacing:0.06em; }
+    .mode-tag-bt { background:rgba(139,92,246,0.15); color:#8b5cf6; border:1px solid rgba(139,92,246,0.3); }
+    .mode-tag-real { background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); }
 
-    .page-title { font-size: 22px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
-    .page-sub { font-size: 13px; color: #64748b; margin-bottom: 28px; }
+    /* CLOCK */
+    .clock-wrap { display:flex; align-items:center; gap:8px; padding:6px 14px; border-radius:20px; transition:all 0.5s; }
+    .clock-time { font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; }
+    .clock-label { font-size:10px; color:#64748b; }
+    .clock-green { border:1px solid rgba(16,185,129,0.4); background:rgba(16,185,129,0.08); }
+    .clock-green .clock-time { color:#10b981; }
+    .clock-orange { border:1px solid rgba(245,158,11,0.4); background:rgba(245,158,11,0.08); animation:pulse-border 1.5s infinite; }
+    .clock-orange .clock-time { color:#f59e0b; }
+    .clock-orange .clock-label { color:#f59e0b; }
+    .clock-red { border:1px solid rgba(244,63,94,0.5); background:rgba(244,63,94,0.1); animation:pulse-border 0.8s infinite; }
+    .clock-red .clock-time { color:#f43f5e; }
+    .clock-red .clock-label { color:#f43f5e; }
+    @keyframes pulse-border { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
-    /* ── CHECKLIST ── */
-    .checklist { display: flex; flex-direction: column; gap: 14px; }
-
-    .check-item {
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.03);
-      overflow: hidden;
-      transition: all 0.2s;
-    }
-    .check-item.checked {
-      border-color: rgba(6,182,212,0.4);
-      background: linear-gradient(90deg, rgba(6,182,212,0.08), rgba(59,130,246,0.04));
-    }
-    .check-item.locked { opacity: 0.4; }
-    .check-item.expired-item { border-color: rgba(244,63,94,0.4); background: rgba(244,63,94,0.05); }
-
-    .check-row {
-      display: flex; align-items: center; gap: 18px; padding: 20px 24px;
-      cursor: pointer; user-select: none;
-    }
-    .check-row.no-click { cursor: default; }
-    .check-row.locked-cursor { cursor: not-allowed; }
-
-    .checkbox {
-      width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0;
-      border: 2px solid #334155; background: transparent;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s;
-    }
-    .checkbox.checked { border-color: #06b6d4; background: linear-gradient(135deg, #06b6d4, #3b82f6); }
-    .checkbox.expired { border-color: #f43f5e; }
-    .checkmark { display: none; }
-    .checkbox.checked .checkmark { display: block; }
-    .checkbox.expired .expired-x { display: block; font-size: 12px; color: #f43f5e; }
-    .expired-x { display: none; }
-
-    .check-text { flex: 1; }
-    .check-num { font-size: 11px; font-weight: 700; color: #475569; margin-right: 8px; letter-spacing: 0.05em; }
-    .check-num.active-num { color: #06b6d4; }
-    .check-label { font-size: 14px; font-weight: 600; color: #94a3b8; }
-    .check-label.checked-label { color: #e2e8f0; }
-    .check-label.expired-label { color: #f43f5e; }
-    .check-desc { font-size: 12px; color: #475569; margin-top: 3px; }
-    .lock-icon { font-size: 16px; color: #334155; }
-
-    .timer-inline { display: none; flex-direction: column; align-items: flex-end; gap: 2px; }
-    .timer-inline.visible { display: flex; }
-    #timer-display { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
-    .timer-sub { font-size: 10px; color: #475569; }
-
-    /* DXY panel */
-    .dxy-panel {
-      padding: 16px 24px; border-top: none;
-      border-top: 1px solid rgba(6,182,212,0.08);
-      background: rgba(6,182,212,0.02);
-      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-    }
-    .dxy-panel.expired-panel { border-top-color: rgba(244,63,94,0.15); }
-
-    .field-label {
-      font-size: 11px; font-weight: 600; color: #475569;
-      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px;
-    }
-    .timer-progress { flex: 1; min-width: 160px; }
-    .progress-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
-    .progress-label { font-size: 11px; color: #475569; }
-    #progress-pct { font-size: 11px; font-weight: 700; }
-    .progress-track { height: 6px; border-radius: 3px; background: #1e293b; overflow: hidden; }
-    #progress-fill { height: 100%; border-radius: 3px; width: 100%; transition: width 1s linear, background 0.5s; background: #10b981; }
-
-    .dxy-actions { display: flex; gap: 8px; margin-left: auto; }
-    #expired-msg {
-      display: none; width: 100%; padding: 10px 14px; border-radius: 8px;
-      background: rgba(244,63,94,0.07); border: 1px solid rgba(244,63,94,0.18);
-      font-size: 12px; color: #f43f5e; font-weight: 600; margin-top: 4px;
-    }
-
-    /* ── BUTTONS ── */
-    .btn {
-      padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 13px;
-      border: none; cursor: pointer; transition: all 0.15s; white-space: nowrap;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #0a0f1e;
-    }
-    .btn-primary:disabled {
-      background: #1e293b; color: #475569; cursor: not-allowed;
-    }
-    .btn-ghost {
-      background: transparent; border: 1px solid #334155; color: #64748b;
-    }
-    .btn-submit {
-      width: 100%; padding: 14px 0; border-radius: 10px; font-weight: 800;
-      font-size: 15px; border: none; cursor: pointer; letter-spacing: 0.02em;
-      background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #0a0f1e;
-      transition: all 0.2s; margin-top: 20px;
-    }
-    .btn-submit.saved { background: linear-gradient(135deg, #10b981, #059669); }
-
-    /* ── SUCCESS BANNER ── */
-    #setup-valid {
-      display: none; margin-top: 24px; padding: 16px 24px; border-radius: 12px;
-      background: linear-gradient(90deg, rgba(6,182,212,0.12), rgba(59,130,246,0.08));
-      border: 1px solid rgba(6,182,212,0.3);
-      align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-    }
-    #setup-valid.visible { display: flex; }
-
-    /* ── FORM ── */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .field { margin-bottom: 0; }
-    .input {
-      width: 100%; padding: 10px 14px; border-radius: 8px;
-      border: 1px solid #1e293b; background: rgba(255,255,255,0.03);
-      color: #e2e8f0; font-size: 14px; outline: none; font-family: inherit;
-    }
-    .input:focus { border-color: rgba(6,182,212,0.4); }
-    textarea.input { resize: vertical; }
-
-    .toggle-group { display: flex; gap: 8px; }
-    .toggle-btn {
-      flex: 1; padding: 10px 0; border-radius: 8px; font-weight: 700; font-size: 13px;
-      border: 1.5px solid #1e293b; background: rgba(255,255,255,0.02);
-      color: #475569; cursor: pointer; transition: all 0.15s;
-    }
-    .toggle-btn.active-long { border-color: #10b981; background: rgba(16,185,129,0.12); color: #10b981; }
-    .toggle-btn.active-short { border-color: #f43f5e; background: rgba(244,63,94,0.12); color: #f43f5e; }
-    .toggle-btn.active-win { border-color: #10b981; background: rgba(16,185,129,0.12); color: #10b981; }
-    .toggle-btn.active-loss { border-color: #f43f5e; background: rgba(244,63,94,0.12); color: #f43f5e; }
-    .toggle-btn.active-be { border-color: #f59e0b; background: rgba(245,158,11,0.12); color: #f59e0b; }
-
-    .rr-display {
-      width: 100%; padding: 10px 14px; border-radius: 8px;
-      border: 1px solid #1e293b; background: rgba(255,255,255,0.03);
-      font-size: 14px; font-weight: 700; color: #334155; min-height: 42px;
-      display: flex; align-items: center;
-    }
-    .rr-display.has-value { color: #06b6d4; }
-
-    .full-width { grid-column: 1 / -1; }
-    .mt-14 { margin-top: 14px; }
-
-    /* ── STATS ── */
-    .stat-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 14px; }
-    .stat-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .stat-card {
-      padding: 18px 20px; border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);
-    }
-    .stat-label { font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
-    .stat-value { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
-
-    .chart-box {
-      margin-top: 20px; padding: 20px 24px; border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);
-    }
-    .chart-title { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.08em; }
-    .bar-row { margin-bottom: 10px; }
-    .bar-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
-    .bar-track { height: 6px; border-radius: 3px; background: #1e293b; }
-    .bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-
-    /* ── JOURNAL ── */
-    .trade-list { display: flex; flex-direction: column; gap: 12px; }
-    .trade-card {
-      padding: 16px 20px; border-radius: 10px;
-      display: grid; grid-template-columns: auto 1fr auto auto; gap: 16px; align-items: center;
-    }
-    .result-badge { padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 12px; }
-    .trade-main { font-size: 13px; font-weight: 600; color: #e2e8f0; }
-    .trade-meta { font-size: 11px; color: #475569; margin-top: 2px; }
-    .trade-notes { font-size: 11px; color: #64748b; margin-top: 4px; font-style: italic; }
-    .trade-checks { font-size: 10px; color: #334155; text-align: right; }
-    .delete-btn {
-      background: transparent; border: none; color: #334155; cursor: pointer;
-      font-size: 18px; padding: 4px; line-height: 1;
-    }
-    .delete-btn:hover { color: #f43f5e; }
-
-    /* ── EMPTY ── */
-    .empty { text-align: center; padding: 60px 0; color: #334155; font-size: 14px; }
-    .empty-icon { font-size: 40px; margin-bottom: 12px; }
-
+    /* TIMER BADGE */
+    #timer-badge { display:none; align-items:center; gap:8px; padding:6px 14px; border-radius:20px; }
+    .badge-dot { width:7px; height:7px; border-radius:50%; animation:blink 1s infinite; }
+    #expired-badge { display:none; padding:6px 14px; border-radius:20px; border:1px solid rgba(244,63,94,0.4); background:rgba(244,63,94,0.1); font-size:12px; font-weight:700; color:#f43f5e; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    @media (max-width: 600px) {
-      .form-grid { grid-template-columns: 1fr; }
-      .stat-grid-3 { grid-template-columns: 1fr 1fr; }
-      .tabs { overflow-x: auto; }
-      .tab-btn { padding: 10px 14px; font-size: 13px; }
+    /* TABS */
+    .tabs { display:flex; gap:0; margin-top:12px; }
+    .tab-btn { padding:10px 20px; font-size:14px; font-weight:600; letter-spacing:0.02em; background:transparent; border:none; border-bottom:2px solid transparent; color:#64748b; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+    .tab-btn:hover { color:#e2e8f0; }
+    .tab-btn.active { border-bottom-color:#06b6d4; color:#06b6d4; }
+    .tab-badge { margin-left:6px; border-radius:10px; font-size:10px; font-weight:700; padding:1px 6px; display:inline-block; vertical-align:middle; }
+
+    /* CONTENT */
+    .content { max-width:900px; margin:0 auto; padding:32px 24px; }
+    .page { display:none; }
+    .page.active { display:block; }
+    .page-title { font-size:22px; font-weight:700; color:#f1f5f9; margin-bottom:4px; }
+    .page-sub { font-size:13px; color:#64748b; margin-bottom:28px; }
+
+    /* SESSION WARNING BANNER */
+    #session-warning { display:none; margin-bottom:20px; padding:12px 18px; border-radius:10px; font-size:13px; font-weight:600; align-items:center; gap:10px; }
+    .sw-orange { background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); color:#f59e0b; }
+    .sw-red { background:rgba(244,63,94,0.08); border:1px solid rgba(244,63,94,0.3); color:#f43f5e; }
+
+    /* CHECKLIST */
+    .checklist { display:flex; flex-direction:column; gap:14px; }
+    .check-item { border-radius:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); overflow:hidden; transition:all 0.2s; }
+    .check-item.checked { border-color:rgba(6,182,212,0.4); background:linear-gradient(90deg,rgba(6,182,212,0.08),rgba(59,130,246,0.04)); }
+    .check-item.locked { opacity:0.4; }
+    .check-item.expired-item { border-color:rgba(244,63,94,0.4); background:rgba(244,63,94,0.05); }
+    .check-item.aplus { border-color:rgba(168,85,247,0.5) !important; background:linear-gradient(90deg,rgba(168,85,247,0.1),rgba(59,130,246,0.05)) !important; }
+    .check-item.golden { border-color:rgba(251,191,36,0.5) !important; background:linear-gradient(90deg,rgba(251,191,36,0.08),rgba(245,158,11,0.04)) !important; }
+    .check-row { display:flex; align-items:center; gap:18px; padding:20px 24px; cursor:pointer; user-select:none; }
+    .check-row.no-click { cursor:default; }
+    .check-row.locked-cursor { cursor:not-allowed; }
+    .checkbox { width:26px; height:26px; border-radius:6px; flex-shrink:0; border:2px solid #334155; background:transparent; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+    .checkbox.checked { border-color:#06b6d4; background:linear-gradient(135deg,#06b6d4,#3b82f6); }
+    .checkbox.expired { border-color:#f43f5e; }
+    .checkmark { display:none; }
+    .checkbox.checked .checkmark { display:block; }
+    .checkbox.expired .expired-x { display:block; font-size:12px; color:#f43f5e; }
+    .expired-x { display:none; }
+    .check-text { flex:1; }
+    .check-num { font-size:11px; font-weight:700; color:#475569; margin-right:8px; letter-spacing:0.05em; }
+    .check-num.active-num { color:#06b6d4; }
+    .check-label { font-size:14px; font-weight:600; color:#94a3b8; }
+    .check-label.checked-label { color:#e2e8f0; }
+    .check-label.expired-label { color:#f43f5e; }
+    .check-desc { font-size:12px; color:#475569; margin-top:3px; }
+    .lock-icon { font-size:16px; color:#334155; }
+    .timer-inline { display:none; flex-direction:column; align-items:flex-end; gap:2px; }
+    .timer-inline.visible { display:flex; }
+    #timer-display { font-size:24px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; }
+    .timer-sub { font-size:10px; color:#475569; }
+
+    /* FVG APLUS PANEL */
+    .fvg-panel { padding:0 24px 18px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .aplus-check { display:flex; align-items:center; gap:10px; padding:10px 16px; border-radius:8px; border:1px solid rgba(168,85,247,0.25); background:rgba(168,85,247,0.06); cursor:pointer; user-select:none; transition:all 0.2s; flex:1; min-width:200px; }
+    .aplus-check:hover { border-color:rgba(168,85,247,0.5); }
+    .aplus-check.active { border-color:rgba(168,85,247,0.6); background:rgba(168,85,247,0.12); }
+    .aplus-box { width:20px; height:20px; border-radius:5px; border:2px solid #6d28d9; background:transparent; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s; }
+    .aplus-box.checked { background:linear-gradient(135deg,#8b5cf6,#6d28d9); border-color:#8b5cf6; }
+    .aplus-text { font-size:13px; font-weight:600; color:#94a3b8; }
+    .aplus-text.active { color:#c4b5fd; }
+    .aplus-badge { font-size:11px; font-weight:800; padding:2px 8px; border-radius:10px; background:rgba(168,85,247,0.2); color:#a78bfa; border:1px solid rgba(168,85,247,0.3); margin-left:auto; white-space:nowrap; }
+
+    /* DXY PANEL */
+    .dxy-panel { padding:16px 24px; border-top:1px solid rgba(6,182,212,0.08); background:rgba(6,182,212,0.02); display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+    .dxy-panel.expired-panel { border-top-color:rgba(244,63,94,0.15); }
+    .field-label { font-size:11px; font-weight:600; color:#475569; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px; }
+    .timer-progress { flex:1; min-width:160px; }
+    .progress-header { display:flex; justify-content:space-between; margin-bottom:6px; }
+    .progress-label { font-size:11px; color:#475569; }
+    #progress-pct { font-size:11px; font-weight:700; }
+    .progress-track { height:6px; border-radius:3px; background:#1e293b; overflow:hidden; }
+    #progress-fill { height:100%; border-radius:3px; width:100%; transition:width 1s linear, background 0.5s; background:#10b981; }
+    .dxy-actions { display:flex; gap:8px; margin-left:auto; }
+    #expired-msg { display:none; width:100%; padding:10px 14px; border-radius:8px; background:rgba(244,63,94,0.07); border:1px solid rgba(244,63,94,0.18); font-size:12px; color:#f43f5e; font-weight:600; margin-top:4px; }
+
+    /* BUTTONS */
+    .btn { padding:9px 18px; border-radius:8px; font-weight:700; font-size:13px; border:none; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+    .btn-primary { background:linear-gradient(135deg,#06b6d4,#3b82f6); color:#0a0f1e; }
+    .btn-primary:disabled { background:#1e293b; color:#475569; cursor:not-allowed; }
+    .btn-ghost { background:transparent; border:1px solid #334155; color:#64748b; }
+    .btn-submit { width:100%; padding:14px 0; border-radius:10px; font-weight:800; font-size:15px; border:none; cursor:pointer; letter-spacing:0.02em; background:linear-gradient(135deg,#06b6d4,#3b82f6); color:#0a0f1e; transition:all 0.2s; margin-top:20px; }
+    .btn-submit.saved { background:linear-gradient(135deg,#10b981,#059669); }
+
+    /* SETUP VALID */
+    #setup-valid { display:none; margin-top:24px; padding:16px 24px; border-radius:12px; background:linear-gradient(90deg,rgba(6,182,212,0.12),rgba(59,130,246,0.08)); border:1px solid rgba(6,182,212,0.3); align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    #setup-valid.visible { display:flex; }
+    #aplus-label { display:none; font-size:12px; color:#a78bfa; font-weight:700; }
+    #aplus-label.visible { display:block; }
+
+    /* FORM */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .field { margin-bottom:0; }
+    .input { width:100%; padding:10px 14px; border-radius:8px; border:1px solid #1e293b; background:rgba(255,255,255,0.03); color:#e2e8f0; font-size:14px; outline:none; font-family:inherit; }
+    .input:focus { border-color:rgba(6,182,212,0.4); }
+    textarea.input { resize:vertical; }
+    .toggle-group { display:flex; gap:8px; }
+    .toggle-btn { flex:1; padding:10px 0; border-radius:8px; font-weight:700; font-size:13px; border:1.5px solid #1e293b; background:rgba(255,255,255,0.02); color:#475569; cursor:pointer; transition:all 0.15s; }
+    .toggle-btn.active-long { border-color:#10b981; background:rgba(16,185,129,0.12); color:#10b981; }
+    .toggle-btn.active-short { border-color:#f43f5e; background:rgba(244,63,94,0.12); color:#f43f5e; }
+    .toggle-btn.active-win { border-color:#10b981; background:rgba(16,185,129,0.12); color:#10b981; }
+    .toggle-btn.active-loss { border-color:#f43f5e; background:rgba(244,63,94,0.12); color:#f43f5e; }
+    .toggle-btn.active-be { border-color:#f59e0b; background:rgba(245,158,11,0.12); color:#f59e0b; }
+    .rr-display { width:100%; padding:10px 14px; border-radius:8px; border:1px solid #1e293b; background:rgba(255,255,255,0.03); font-size:14px; font-weight:700; color:#334155; min-height:42px; display:flex; align-items:center; }
+    .rr-display.has-value { color:#06b6d4; }
+    .full-width { grid-column:1/-1; }
+    .mt-14 { margin-top:14px; }
+
+    /* STATS */
+    .stat-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:14px; }
+    .stat-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .stat-card { padding:18px 20px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); }
+    .stat-label { font-size:11px; color:#475569; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px; }
+    .stat-value { font-size:28px; font-weight:800; letter-spacing:-0.5px; }
+    .chart-box { margin-top:20px; padding:20px 24px; border-radius:12px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); }
+    .chart-title { font-size:12px; font-weight:600; color:#64748b; margin-bottom:14px; text-transform:uppercase; letter-spacing:0.08em; }
+    .bar-row { margin-bottom:10px; }
+    .bar-header { display:flex; justify-content:space-between; margin-bottom:4px; }
+    .bar-track { height:6px; border-radius:3px; background:#1e293b; }
+    .bar-fill { height:100%; border-radius:3px; transition:width 0.5s ease; }
+    .aplus-stat { margin-top:14px; padding:16px 20px; border-radius:10px; border:1px solid rgba(168,85,247,0.25); background:rgba(168,85,247,0.05); display:flex; align-items:center; justify-content:space-between; }
+
+    /* JOURNAL */
+    .trade-list { display:flex; flex-direction:column; gap:12px; }
+    .trade-card { padding:16px 20px; border-radius:10px; display:grid; grid-template-columns:auto 1fr auto auto; gap:16px; align-items:center; }
+    .result-badge { padding:4px 10px; border-radius:6px; font-weight:800; font-size:12px; }
+    .trade-main { font-size:13px; font-weight:600; color:#e2e8f0; }
+    .trade-meta { font-size:11px; color:#475569; margin-top:2px; }
+    .trade-notes { font-size:11px; color:#64748b; margin-top:4px; font-style:italic; }
+    .delete-btn { background:transparent; border:1px solid #1e293b; color:#475569; cursor:pointer; font-size:14px; padding:5px 10px; border-radius:6px; transition:all 0.15s; font-weight:600; }
+    .delete-btn:hover { border-color:#f43f5e; color:#f43f5e; background:rgba(244,63,94,0.08); }
+
+    /* JOURNAL FILTERS */
+    .journal-filters { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+    .filter-btn { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; border:1px solid #1e293b; background:transparent; color:#64748b; cursor:pointer; transition:all 0.15s; }
+    .filter-btn.active { background:#1e293b; color:#e2e8f0; border-color:#334155; }
+
+    /* EMPTY */
+    .empty { text-align:center; padding:60px 0; color:#334155; font-size:14px; }
+    .empty-icon { font-size:40px; margin-bottom:12px; }
+
+    /* CONFIRM DIALOG */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; }
+    .overlay.visible { display:flex; }
+    .dialog { background:#0d1529; border:1px solid rgba(244,63,94,0.3); border-radius:14px; padding:28px; max-width:360px; width:90%; text-align:center; }
+    .dialog-title { font-size:16px; font-weight:700; color:#f1f5f9; margin-bottom:8px; }
+    .dialog-sub { font-size:13px; color:#64748b; margin-bottom:24px; }
+    .dialog-btns { display:flex; gap:10px; }
+    .btn-danger { flex:1; padding:11px 0; border-radius:8px; background:rgba(244,63,94,0.15); border:1px solid rgba(244,63,94,0.4); color:#f43f5e; font-weight:700; font-size:14px; cursor:pointer; }
+    .btn-cancel { flex:1; padding:11px 0; border-radius:8px; background:transparent; border:1px solid #334155; color:#64748b; font-weight:700; font-size:14px; cursor:pointer; }
+
+    @media (max-width:600px) {
+      .form-grid { grid-template-columns:1fr; }
+      .stat-grid-3 { grid-template-columns:1fr 1fr; }
+      .tabs { overflow-x:auto; }
+      .tab-btn { padding:10px 12px; font-size:12px; }
+      .header-top { gap:8px; }
+      .mode-btn { padding:6px 10px; font-size:11px; }
     }
   </style>
 </head>
 <body>
 
+<!-- DELETE CONFIRM DIALOG -->
+<div class="overlay" id="confirm-overlay">
+  <div class="dialog">
+    <div class="dialog-title">Supprimer ce trade ?</div>
+    <div class="dialog-sub">Cette action est irréversible.</div>
+    <div class="dialog-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Annuler</button>
+      <button class="btn-danger" onclick="confirmDelete()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
 <!-- HEADER -->
 <div id="header">
   <div class="header-inner">
-    <div class="header-top" style="display:flex;align-items:center;gap:12px;padding:18px 0 0;">
+    <div class="header-top">
       <div class="logo">📊</div>
       <div>
         <div class="header-title">EURUSD · Liquidity Journal</div>
         <div class="header-sub">ICT / SMC · Asian Liquidity + IFVG</div>
       </div>
+
+      <!-- CLOCK -->
+      <div class="clock-wrap clock-green" id="session-clock">
+        <span class="clock-time" id="clock-time">--:--:--</span>
+        <span class="clock-label" id="clock-label">Session active</span>
+      </div>
+
+      <!-- TIMER BADGE -->
       <div id="timer-badge">
         <div class="badge-dot" id="badge-dot"></div>
-        <span id="timer-badge-text">25:00</span>
-        <span id="timer-badge-label">restant</span>
+        <span id="timer-badge-text" style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;">25:00</span>
+        <span style="font-size:10px;color:#64748b;">restant</span>
       </div>
       <div id="expired-badge">⛔ Scénario invalidé</div>
+
+      <!-- NY SESSION COUNTDOWN -->
+      <div id="ny-countdown" style="display:none;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;border:1px solid rgba(168,85,247,0.4);background:rgba(168,85,247,0.08);">
+        <span style="font-size:12px;">🗽</span>
+        <span id="ny-countdown-text" style="font-size:13px;font-weight:800;color:#a78bfa;font-variant-numeric:tabular-nums;"></span>
+        <span style="font-size:10px;color:#64748b;">avant NY</span>
+      </div>
+      <div id="ny-active" style="display:none;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;border:1px solid rgba(168,85,247,0.5);background:rgba(168,85,247,0.12);">
+        <span style="font-size:12px;">🗽</span>
+        <span style="font-size:13px;font-weight:800;color:#a78bfa;">Session NY</span>
+        <span id="ny-end-text" style="font-size:10px;color:#64748b;"></span>
+      </div>
+
+      <!-- DAILY TRADE COUNTER (réel uniquement) -->
+      <div id="daily-counter" style="display:none;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;">
+        <span style="font-size:11px;color:#64748b;">Trades/jour</span>
+        <span id="daily-count" style="font-size:15px;font-weight:800;">0</span>
+        <span style="font-size:11px;color:#64748b;">/2</span>
+      </div>
+      <div class="mode-toggle" id="mode-toggle">
+        <button class="mode-btn active-bt" id="btn-bt" onclick="setMode('backtest')">🔬 BACKTEST</button>
+        <button class="mode-btn" id="btn-real" onclick="setMode('real')">🔴 RÉEL</button>
+      </div>
     </div>
+
     <div class="tabs">
       <button class="tab-btn active" onclick="showTab('checklist')">Checklist</button>
-      <button class="tab-btn" id="tab-position" onclick="showTab('position')" disabled style="opacity:0.35;cursor:not-allowed;">
-        Prise de position
-      </button>
-      <button class="tab-btn" onclick="showTab('stats')">
-        Statistiques <span class="tab-badge" id="stats-badge" style="display:none;background:#1e293b;color:#94a3b8;"></span>
-      </button>
-      <button class="tab-btn" onclick="showTab('journal')">Journal</button>
+      <button class="tab-btn" id="tab-position" onclick="showTab('position')" disabled style="opacity:0.35;cursor:not-allowed;">Prise de position</button>
+      <button class="tab-btn" onclick="showTab('stats')">Statistiques <span class="tab-badge" id="stats-badge" style="display:none;background:#1e293b;color:#94a3b8;"></span></button>
+      <button class="tab-btn" onclick="showTab('journal')">Journal <span class="tab-badge" id="journal-badge" style="display:none;background:#1e293b;color:#94a3b8;"></span></button>
     </div>
   </div>
 </div>
@@ -307,21 +289,31 @@
     <div class="page-title">Conditions d'entrée</div>
     <div class="page-sub">Les 4 conditions doivent être validées pour accéder à la prise de position.</div>
 
+    <!-- Session warning -->
+    <div id="session-warning"></div>
+    <div id="daily-limit-banner" style="display:none;margin-bottom:18px;padding:14px 20px;border-radius:10px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.3);font-size:13px;color:#f43f5e;font-weight:600;">
+      🚫 Limite journalière atteinte — <span id="daily-limit-msg"></span>
+    </div>
+
+    <!-- Sélecteur : qui sweep en premier ? -->
+    <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+      <button class="sweeper-btn active-dxy" id="sw-dxy" onclick="setSweeper('dxy')">
+        <span style="font-size:13px;">📉</span> DXY en premier
+      </button>
+      <button class="sweeper-btn" id="sw-eurusd" onclick="setSweeper('eurusd')">
+        <span style="font-size:13px;">💶</span> EURUSD en premier
+      </button>
+    </div>
+
     <div class="checklist">
 
-      <!-- CONDITION 1 : DXY -->
-      <div class="check-item" id="item-dxy">
-        <div class="check-row no-click" style="border-radius:12px 12px 0 0;">
-          <div class="checkbox" id="cb-dxy">
-            <svg class="checkmark" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7L5.5 10L11.5 4" stroke="#0a0f1e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span class="expired-x">✕</span>
-          </div>
+      <!-- 01 PREMIER SWEEP (DXY ou EURUSD selon sélection) -->
+      <div class="check-item" id="item-first">
+        <div class="check-row no-click">
+          <div class="checkbox" id="cb-first"><svg class="checkmark" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7L5.5 10L11.5 4" stroke="#0a0f1e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="expired-x">✕</span></div>
           <div class="check-text">
-            <div style="margin-bottom:3px;">
-              <span class="check-num" id="num-dxy">01</span>
-              <span class="check-label" id="lbl-dxy">DXY — Prise de liquidité Asian</span>
-            </div>
-            <div class="check-desc">Renseigne l'heure du sweep pour démarrer le timer 25 min</div>
+            <div style="margin-bottom:3px;"><span class="check-num" id="num-first">01</span><span class="check-label" id="lbl-first">DXY — Prise de liquidité Asian</span></div>
+            <div class="check-desc" id="desc-first">Renseigne l'heure du sweep pour démarrer le timer</div>
           </div>
           <div class="timer-inline" id="timer-inline">
             <div id="timer-display" style="color:#10b981;">25:00</div>
@@ -329,148 +321,128 @@
           </div>
           <div id="expired-label" style="display:none;font-size:13px;font-weight:700;color:#f43f5e;">Expiré</div>
         </div>
-        <!-- DXY panel -->
-        <div class="dxy-panel" id="dxy-panel">
+        <div class="dxy-panel" id="first-panel">
           <div>
-            <div class="field-label">Heure du sweep DXY</div>
-            <input type="time" id="dxy-time" class="input" style="width:130px;" oninput="onDxyTimeChange()" />
+            <div class="field-label" id="first-panel-label">Heure du sweep DXY</div>
+            <input type="time" id="first-time" class="input" style="width:130px;" oninput="onFirstTimeChange()" />
+            <!-- Backtest manual override note -->
+            <div id="bt-note" style="display:none;font-size:11px;color:#8b5cf6;margin-top:6px;">🔬 Backtest — toute heure acceptée</div>
           </div>
           <div class="timer-progress" id="progress-wrap" style="display:none;">
-            <div class="progress-header">
-              <span class="progress-label">Fenêtre d'opportunité</span>
-              <span id="progress-pct" style="color:#10b981;">100%</span>
-            </div>
+            <div class="progress-header"><span class="progress-label">Fenêtre d'opportunité</span><span id="progress-pct" style="color:#10b981;">100%</span></div>
             <div class="progress-track"><div id="progress-fill"></div></div>
           </div>
           <div class="dxy-actions">
             <button class="btn btn-primary" id="btn-start" onclick="startTimer()" disabled>▶ Démarrer</button>
             <button class="btn btn-ghost" id="btn-reset" onclick="resetAll()" style="display:none;">↺ Reset</button>
           </div>
-          <div id="expired-msg">⛔ Fenêtre de 25 min expirée — scénario invalidé. Clique sur Reset pour recommencer.</div>
+          <div id="expired-msg">⛔ Fenêtre expirée — scénario invalidé. Clique sur Reset pour recommencer.</div>
         </div>
       </div>
 
-      <!-- CONDITION 2 : EURUSD -->
-      <div class="check-item locked" id="item-eurusd" onclick="toggleCheck('eurusd')">
-        <div class="check-row locked-cursor" id="row-eurusd">
-          <div class="checkbox" id="cb-eurusd">
-            <svg class="checkmark" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7L5.5 10L11.5 4" stroke="#0a0f1e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
+      <!-- 02 SECOND SWEEP -->
+      <div class="check-item locked" id="item-second" onclick="toggleCheck('second')">
+        <div class="check-row locked-cursor" id="row-second">
+          <div class="checkbox" id="cb-second"><svg class="checkmark" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7L5.5 10L11.5 4" stroke="#0a0f1e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="check-text">
-            <div style="margin-bottom:3px;">
-              <span class="check-num" id="num-eurusd">02</span>
-              <span class="check-label" id="lbl-eurusd">EURUSD — Prise de liquidité Asian</span>
-            </div>
-            <div class="check-desc">Valide dans la fenêtre des 25 min après le sweep DXY</div>
+            <div style="margin-bottom:3px;"><span class="check-num" id="num-second">02</span><span class="check-label" id="lbl-second">EURUSD — Prise de liquidité Asian</span></div>
+            <div class="check-desc" id="desc-second">Valide dans la fenêtre des 25 min après le sweep DXY</div>
           </div>
-          <div class="lock-icon" id="lock-eurusd">🔒</div>
+          <div id="golden-badge" style="display:none;padding:4px 10px;border-radius:20px;background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(245,158,11,0.15));border:1px solid rgba(251,191,36,0.5);font-size:11px;font-weight:800;color:#fbbf24;letter-spacing:0.05em;white-space:nowrap;">⚡ GOLDEN SETUP</div>
+          <div class="lock-icon" id="lock-second">🔒</div>
+        </div>
+        <div id="second-panel" style="display:none;padding:12px 24px 16px;border-top:1px solid rgba(6,182,212,0.08);background:rgba(6,182,212,0.02);">
+          <div class="field-label" id="second-panel-label">Heure de la prise de liquidité EURUSD</div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <input type="time" id="second-time" class="input" style="width:130px;" oninput="checkGolden()" />
+            <div id="golden-hint" style="font-size:12px;color:#475569;">Entre 08:00 et 08:59 → ⚡ Golden Setup</div>
+          </div>
         </div>
       </div>
 
-      <!-- CONDITION 3 : FVG -->
+      <!-- 03 FVG + A++ -->
       <div class="check-item locked" id="item-fvg" onclick="toggleCheck('fvg')">
         <div class="check-row locked-cursor" id="row-fvg">
-          <div class="checkbox" id="cb-fvg">
-            <svg class="checkmark" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7L5.5 10L11.5 4" stroke="#0a0f1e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
+          <div class="checkbox" id="cb-fvg"><svg class="checkmark" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7L5.5 10L11.5 4" stroke="#0a0f1e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="check-text">
-            <div style="margin-bottom:3px;">
-              <span class="check-num" id="num-fvg">03</span>
-              <span class="check-label" id="lbl-fvg">FVG validé</span>
-            </div>
+            <div style="margin-bottom:3px;"><span class="check-num" id="num-fvg">03</span><span class="check-label" id="lbl-fvg">FVG validé</span></div>
             <div class="check-desc">FVG entre 1.3 et 6 pips, formé sur plusieurs bougies</div>
           </div>
           <div class="lock-icon" id="lock-fvg">🔒</div>
         </div>
+        <div class="fvg-panel" id="fvg-aplus-panel" style="display:none;">
+          <div class="aplus-check" id="aplus-check" onclick="toggleAplus(event)">
+            <div class="aplus-box" id="aplus-box"></div>
+            <div class="aplus-text" id="aplus-text">IFVG confluent DXY + EURUSD</div>
+            <div class="aplus-badge">Setup A++</div>
+          </div>
+        </div>
       </div>
 
-      <!-- CONDITION 4 : IFVG -->
+      <!-- 04 IFVG -->
       <div class="check-item locked" id="item-ifvg" onclick="toggleCheck('ifvg')">
         <div class="check-row locked-cursor" id="row-ifvg">
-          <div class="checkbox" id="cb-ifvg">
-            <svg class="checkmark" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7L5.5 10L11.5 4" stroke="#0a0f1e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
+          <div class="checkbox" id="cb-ifvg"><svg class="checkmark" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7L5.5 10L11.5 4" stroke="#0a0f1e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="check-text">
-            <div style="margin-bottom:3px;">
-              <span class="check-num" id="num-ifvg">04</span>
-              <span class="check-label" id="lbl-ifvg">Retest de l'IFVG confirmé</span>
-            </div>
+            <div style="margin-bottom:3px;"><span class="check-num" id="num-ifvg">04</span><span class="check-label" id="lbl-ifvg">Retest de l'IFVG confirmé</span></div>
             <div class="check-desc">Le prix reteste l'IFVG — entrée en position</div>
           </div>
           <div class="lock-icon" id="lock-ifvg">🔒</div>
         </div>
       </div>
 
-    </div><!-- /checklist -->
+    </div>
 
-    <!-- Setup valid banner -->
+    <!-- Setup valid -->
     <div id="setup-valid">
       <div>
-        <div style="font-size:14px;font-weight:700;color:#06b6d4;">✅ Setup validé — IFVG confirmé</div>
+        <div style="font-size:14px;font-weight:700;color:#06b6d4;" id="setup-valid-title">✅ Setup validé — IFVG confirmé</div>
+        <div id="aplus-label">⭐ Confluence A++ détectée — IFVG DXY + EURUSD</div>
         <div style="font-size:12px;color:#64748b;margin-top:2px;">Tu peux accéder à la prise de position</div>
       </div>
       <button class="btn btn-primary" onclick="showTab('position')">Enregistrer →</button>
     </div>
-
-  </div><!-- /page-checklist -->
+  </div>
 
   <!-- ── PRISE DE POSITION ── -->
   <div class="page" id="page-position">
     <div class="page-title">Prise de position</div>
-    <div class="page-sub">Setup validé · EURUSD · Retest IFVG</div>
-
+    <div class="page-sub" id="pos-sub">Setup validé · EURUSD · Retest IFVG</div>
     <div class="form-grid">
-      <div class="field">
-        <div class="field-label">Date</div>
-        <input type="date" id="f-date" class="input" />
-      </div>
-      <div class="field">
-        <div class="field-label">Heure</div>
-        <input type="time" id="f-time" class="input" />
-      </div>
-      <div class="field">
-        <div class="field-label">Direction</div>
+      <div class="field"><div class="field-label">Date</div><input type="date" id="f-date" class="input" /></div>
+      <div class="field"><div class="field-label">Heure</div><input type="time" id="f-time" class="input" /></div>
+      <div class="field"><div class="field-label">Direction</div>
         <div class="toggle-group">
           <button class="toggle-btn active-long" id="btn-long" onclick="setDirection('LONG')">▲ LONG</button>
           <button class="toggle-btn" id="btn-short" onclick="setDirection('SHORT')">▼ SHORT</button>
         </div>
       </div>
-      <div class="field">
-        <div class="field-label">Résultat</div>
+      <div class="field"><div class="field-label">Résultat</div>
         <div class="toggle-group">
           <button class="toggle-btn active-win" id="btn-win" onclick="setResult('WIN')">WIN</button>
           <button class="toggle-btn" id="btn-loss" onclick="setResult('LOSS')">LOSS</button>
           <button class="toggle-btn" id="btn-be" onclick="setResult('BE')">BE</button>
         </div>
       </div>
-      <div class="field">
-        <div class="field-label">Prix d'entrée</div>
-        <input type="number" step="0.00001" id="f-entry" class="input" placeholder="1.08450" oninput="calcRR()" />
-      </div>
-      <div class="field">
-        <div class="field-label">Stop Loss</div>
-        <input type="number" step="0.00001" id="f-sl" class="input" placeholder="1.08320" oninput="calcRR()" />
-      </div>
-      <div class="field">
-        <div class="field-label">Take Profit</div>
-        <input type="number" step="0.00001" id="f-tp" class="input" placeholder="1.08710" oninput="calcRR()" />
-      </div>
-      <div class="field">
-        <div class="field-label">Risk/Reward (auto)</div>
-        <div class="rr-display" id="rr-display">Calculé automatiquement</div>
-      </div>
-      <div class="field full-width mt-14">
-        <div class="field-label">Notes</div>
-        <textarea id="f-notes" class="input" rows="3" placeholder="Contexte du trade, observations, émotions..."></textarea>
-      </div>
+      <div class="field"><div class="field-label">Prix d'entrée</div><input type="number" step="0.00001" id="f-entry" class="input" placeholder="1.08450" oninput="calcRR()" /></div>
+      <div class="field"><div class="field-label">Stop Loss</div><input type="number" step="0.00001" id="f-sl" class="input" placeholder="1.08320" oninput="calcRR()" /></div>
+      <div class="field"><div class="field-label">Take Profit</div><input type="number" step="0.00001" id="f-tp" class="input" placeholder="1.08710" oninput="calcRR()" /></div>
+      <div class="field"><div class="field-label">Risk/Reward (auto)</div><div class="rr-display" id="rr-display">Calculé automatiquement</div></div>
+      <div class="field full-width mt-14"><div class="field-label">Notes</div><textarea id="f-notes" class="input" rows="3" placeholder="Contexte du trade, observations, émotions..."></textarea></div>
     </div>
-
     <button class="btn-submit" id="btn-submit" onclick="submitTrade()">Enregistrer le trade</button>
   </div>
 
   <!-- ── STATS ── -->
   <div class="page" id="page-stats">
-    <div class="page-title">Statistiques</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
+      <div class="page-title" style="margin-bottom:0;">Statistiques</div>
+      <div style="display:flex;gap:8px;">
+        <button class="filter-btn active" id="sf-all" onclick="setStatsFilter('all')">Tous</button>
+        <button class="filter-btn" id="sf-backtest" onclick="setStatsFilter('backtest')">🔬 Backtest</button>
+        <button class="filter-btn" id="sf-real" onclick="setStatsFilter('real')">🔴 Réel</button>
+      </div>
+    </div>
     <div class="page-sub" id="stats-sub">Aucun trade enregistré pour l'instant</div>
     <div id="stats-content" style="display:none;">
       <div class="stat-grid-3">
@@ -478,445 +450,799 @@
         <div class="stat-card"><div class="stat-label">RR Moyen</div><div class="stat-value" id="s-rr" style="color:#3b82f6;">—</div></div>
         <div class="stat-card"><div class="stat-label">Total Trades</div><div class="stat-value" id="s-total" style="color:#8b5cf6;">0</div></div>
       </div>
-      <div class="stat-grid-3" style="margin-bottom:14px;">
+      <div class="stat-grid-3">
         <div class="stat-card"><div class="stat-label">Wins</div><div class="stat-value" id="s-wins" style="color:#10b981;">0</div></div>
         <div class="stat-card"><div class="stat-label">Losses</div><div class="stat-value" id="s-losses" style="color:#f43f5e;">0</div></div>
         <div class="stat-card"><div class="stat-label">Break Even</div><div class="stat-value" id="s-be" style="color:#f59e0b;">0</div></div>
       </div>
-      <div class="stat-grid-2">
+      <div class="stat-grid-2" style="margin-bottom:14px;">
         <div class="stat-card"><div class="stat-label">LONG</div><div class="stat-value" id="s-long" style="color:#10b981;">0</div></div>
         <div class="stat-card"><div class="stat-label">SHORT</div><div class="stat-value" id="s-short" style="color:#f43f5e;">0</div></div>
       </div>
+      <div class="aplus-stat">
+        <div><div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Setup A++</div><div style="font-size:13px;color:#a78bfa;font-weight:600;">IFVG confluent DXY + EURUSD</div></div>
+        <div style="font-size:28px;font-weight:800;color:#8b5cf6;" id="s-aplus">0</div>
+      </div>
+      <div class="aplus-stat" style="margin-top:10px;border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.04);">
+        <div><div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Golden Setup</div><div style="font-size:13px;color:#fbbf24;font-weight:600;">Prise de liquidité EURUSD à 8h</div></div>
+        <div style="font-size:28px;font-weight:800;color:#fbbf24;" id="s-golden">0</div>
+      </div>
       <div class="chart-box">
         <div class="chart-title">Répartition des résultats</div>
-        <div class="bar-row">
-          <div class="bar-header"><span style="font-size:12px;color:#94a3b8;">WIN</span><span style="font-size:12px;font-weight:700;color:#10b981;" id="b-wins">0</span></div>
-          <div class="bar-track"><div class="bar-fill" id="bf-wins" style="width:0%;background:#10b981;"></div></div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-header"><span style="font-size:12px;color:#94a3b8;">LOSS</span><span style="font-size:12px;font-weight:700;color:#f43f5e;" id="b-losses">0</span></div>
-          <div class="bar-track"><div class="bar-fill" id="bf-losses" style="width:0%;background:#f43f5e;"></div></div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-header"><span style="font-size:12px;color:#94a3b8;">BE</span><span style="font-size:12px;font-weight:700;color:#f59e0b;" id="b-be">0</span></div>
-          <div class="bar-track"><div class="bar-fill" id="bf-be" style="width:0%;background:#f59e0b;"></div></div>
-        </div>
+        <div class="bar-row"><div class="bar-header"><span style="font-size:12px;color:#94a3b8;">WIN</span><span style="font-size:12px;font-weight:700;color:#10b981;" id="b-wins">0</span></div><div class="bar-track"><div class="bar-fill" id="bf-wins" style="width:0%;background:#10b981;"></div></div></div>
+        <div class="bar-row"><div class="bar-header"><span style="font-size:12px;color:#94a3b8;">LOSS</span><span style="font-size:12px;font-weight:700;color:#f43f5e;" id="b-losses">0</span></div><div class="bar-track"><div class="bar-fill" id="bf-losses" style="width:0%;background:#f43f5e;"></div></div></div>
+        <div class="bar-row"><div class="bar-header"><span style="font-size:12px;color:#94a3b8;">BE</span><span style="font-size:12px;font-weight:700;color:#f59e0b;" id="b-be">0</span></div><div class="bar-track"><div class="bar-fill" id="bf-be" style="width:0%;background:#f59e0b;"></div></div></div>
       </div>
     </div>
-    <div class="empty" id="stats-empty">
-      <div class="empty-icon">📭</div>
-      Aucune donnée — commence par enregistrer des trades.
-    </div>
+    <div class="empty" id="stats-empty"><div class="empty-icon">📭</div>Aucune donnée — commence par enregistrer des trades.</div>
   </div>
 
   <!-- ── JOURNAL ── -->
   <div class="page" id="page-journal">
-    <div class="page-title">Journal des trades</div>
-    <div class="page-sub" id="journal-sub">Aucun trade enregistré</div>
-    <div class="trade-list" id="trade-list"></div>
-    <div class="empty" id="journal-empty">
-      <div class="empty-icon">📓</div>
-      Ton journal est vide — commence à trader !
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
+      <div class="page-title" style="margin-bottom:0;">Journal des trades</div>
     </div>
+    <div class="page-sub" id="journal-sub">Aucun trade enregistré</div>
+    <div class="journal-filters">
+      <button class="filter-btn active" id="jf-all" onclick="setJournalFilter('all')">Tous</button>
+      <button class="filter-btn" id="jf-backtest" onclick="setJournalFilter('backtest')">🔬 Backtest</button>
+      <button class="filter-btn" id="jf-real" onclick="setJournalFilter('real')">🔴 Réel</button>
+      <button class="filter-btn" id="jf-aplus" onclick="setJournalFilter('aplus')">⭐ A++</button>
+      <button class="filter-btn" id="jf-golden" onclick="setJournalFilter('golden')">⚡ Golden</button>
+    </div>
+    <div class="trade-list" id="trade-list"></div>
+    <div class="empty" id="journal-empty"><div class="empty-icon">📓</div>Ton journal est vide — commence à trader !</div>
   </div>
 
-</div><!-- /content -->
+</div>
 
 <script>
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  STATE
-// ═══════════════════════════════════════
-const TIMER_DURATION = 25 * 60;
-let timerState = 'idle'; // idle | running | expired
+// ═══════════════════════════════════
+const TIMER_DXY_FIRST    = 25 * 60; // DXY sweeps first → 25 min window for EURUSD
+const TIMER_EURUSD_FIRST = 15 * 60; // EURUSD sweeps first → 15 min window for DXY
+let sweeper = 'dxy';   // 'dxy' | 'eurusd'  — who sweeps first
+let timerDuration = TIMER_DXY_FIRST;
+let timerState = 'idle';
 let timerInterval = null;
-let remaining = TIMER_DURATION;
-let checks = { dxy: false, eurusd: false, fvg: false, ifvg: false };
+let clockInterval = null;
+let remaining = TIMER_DXY_FIRST;
+let checks = { first:false, second:false, fvg:false, ifvg:false };
+let aplussActive = false;
+let goldenActive = false;
 let direction = 'LONG';
 let result = 'WIN';
+let currentMode = 'backtest';
+let statsFilter = 'all';
+let journalFilter = 'all';
+let pendingDeleteId = null;
 let trades = JSON.parse(localStorage.getItem('trading-trades') || '[]');
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  INIT
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
-  document.getElementById('f-date').value = now.toISOString().slice(0, 10);
-  document.getElementById('f-time').value = now.toTimeString().slice(0, 5);
+  document.getElementById('f-date').value = now.toISOString().slice(0,10);
+  document.getElementById('f-time').value = now.toTimeString().slice(0,5);
+  setSweeper('dxy');
+  startClock();
   refreshStats();
   refreshJournal();
   updateTabBadge();
 });
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
+//  SWEEPER SELECTOR
+// ═══════════════════════════════════
+function setSweeper(s) {
+  if (timerState !== 'idle') resetAll();
+  sweeper = s;
+  timerDuration = s === 'dxy' ? TIMER_DXY_FIRST : TIMER_EURUSD_FIRST;
+  remaining = timerDuration;
+  // Buttons
+  document.getElementById('sw-dxy').className    = 'sweeper-btn' + (s === 'dxy'    ? ' active-dxy'    : '');
+  document.getElementById('sw-eurusd').className = 'sweeper-btn' + (s === 'eurusd' ? ' active-eurusd' : '');
+  // Labels first condition
+  if (s === 'dxy') {
+    document.getElementById('lbl-first').textContent  = 'DXY — Prise de liquidité Asian';
+    document.getElementById('desc-first').textContent = 'Renseigne l\'heure du sweep DXY pour démarrer le timer 25 min';
+    document.getElementById('first-panel-label').textContent = 'Heure du sweep DXY';
+    document.getElementById('lbl-second').textContent = 'EURUSD — Prise de liquidité Asian';
+    document.getElementById('desc-second').textContent = 'Valide dans la fenêtre des 25 min après le sweep DXY';
+    document.getElementById('second-panel-label').textContent = 'Heure de la prise de liquidité EURUSD';
+    document.getElementById('timer-display').textContent = '25:00';
+  } else {
+    document.getElementById('lbl-first').textContent  = 'EURUSD — Prise de liquidité Asian';
+    document.getElementById('desc-first').textContent = 'Renseigne l\'heure du sweep EURUSD pour démarrer le timer 15 min';
+    document.getElementById('first-panel-label').textContent = 'Heure du sweep EURUSD';
+    document.getElementById('lbl-second').textContent = 'DXY — Prise de liquidité Asian';
+    document.getElementById('desc-second').textContent = 'Valide dans la fenêtre des 15 min après le sweep EURUSD';
+    document.getElementById('second-panel-label').textContent = 'Heure de la prise de liquidité DXY';
+    document.getElementById('timer-display').textContent = '15:00';
+  }
+  // Golden badge only relevant when EURUSD is second (DXY first mode)
+  updateGoldenHintVisibility();
+}
+
+function updateGoldenHintVisibility() {
+  // Golden setup = EURUSD sweep at 8h → only relevant when EURUSD is second slot
+  const show = sweeper === 'dxy';
+  document.getElementById('golden-badge').style.display = 'none';
+  document.getElementById('golden-hint').style.display = show ? '' : 'none';
+}
+
+// ═══════════════════════════════════
+//  MODE
+// ═══════════════════════════════════
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('btn-bt').className   = 'mode-btn' + (mode === 'backtest' ? ' active-bt'   : '');
+  document.getElementById('btn-real').className = 'mode-btn' + (mode === 'real'     ? ' active-real' : '');
+  const toggle = document.getElementById('mode-toggle');
+  toggle.style.borderColor = mode === 'backtest' ? '#8b5cf6' : '#f59e0b';
+  setTimeout(() => toggle.style.borderColor = '#1e293b', 800);
+  // Show backtest note on first panel
+  document.getElementById('bt-note').style.display = mode === 'backtest' ? '' : 'none';
+  updateClock();
+  updateDailyCounter();
+}
+
+// ═══════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════
+function startClock() { updateClock(); clockInterval = setInterval(updateClock, 1000); }
+
+function updateClock() {
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  const timeStr = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  const totalMin = h * 60 + m;
+  const clock = document.getElementById('session-clock');
+  const clockLabel = document.getElementById('clock-label');
+  const warning = document.getElementById('session-warning');
+  document.getElementById('clock-time').textContent = timeStr;
+
+  // NY session: 13:30 → 17:00
+  const nyStart = 13*60+30, nyEnd = 17*60;
+  const nyCD = document.getElementById('ny-countdown');
+  const nyAct = document.getElementById('ny-active');
+  const nyET = document.getElementById('ny-end-text');
+  const nyCDT = document.getElementById('ny-countdown-text');
+  if (totalMin < nyStart) {
+    const secLeft = (nyStart - totalMin)*60 - s;
+    nyCDT.textContent = fmtCountdown(secLeft);
+    nyCD.style.display = 'flex'; nyAct.style.display = 'none';
+  } else if (totalMin < nyEnd) {
+    const secLeft = (nyEnd - totalMin)*60 - s;
+    nyET.textContent = 'fin dans '+fmtCountdown(secLeft);
+    nyCD.style.display = 'none'; nyAct.style.display = 'flex';
+  } else {
+    nyCD.style.display = 'none'; nyAct.style.display = 'none';
+  }
+
+  // Daily counter (réel only)
+  updateDailyCounter();
+
+  if (currentMode === 'backtest') {
+    clock.className = 'clock-wrap clock-green';
+    clockLabel.textContent = '🔬 Mode Backtest';
+    warning.style.display = 'none';
+    return;
+  }
+  // London session warnings
+  if (totalMin >= 11*60 && totalMin < nyStart) {
+    clock.className = 'clock-wrap clock-orange';
+    clockLabel.textContent = '⏸ Entre sessions';
+    warning.className = 'sw-orange'; warning.style.display = 'flex';
+    warning.innerHTML = '⏸ <span>Hors killzone Londres. Session NY ouvre à 13h30.</span>';
+  } else if (totalMin >= nyEnd) {
+    clock.className = 'clock-wrap clock-red';
+    clockLabel.textContent = '⛔ Sessions terminées';
+    warning.className = 'sw-red'; warning.style.display = 'flex';
+    warning.innerHTML = '🔴 <span>Sessions terminées pour aujourd\'hui.</span>';
+  } else if (totalMin >= 10*60+30 && totalMin < 11*60) {
+    clock.className = 'clock-wrap clock-orange';
+    const ml = (11*60)-totalMin;
+    clockLabel.textContent = '⚠️ Fin Londres dans '+ml+'min';
+    warning.className = 'sw-orange'; warning.style.display = 'flex';
+    warning.innerHTML = '⚠️ <span>Fin session Londres dans <strong>'+ml+' min</strong>. Session NY à 13h30.</span>';
+  } else {
+    clock.className = 'clock-wrap clock-green';
+    clockLabel.textContent = totalMin >= nyStart ? '🗽 Session NY active' : 'Session Londres active';
+    warning.style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════
+//  DAILY TRADE LIMIT (réel only)
+// ═══════════════════════════════════
+function getTodayKey() { return new Date().toISOString().slice(0,10); }
+
+function getTodayRealTrades() {
+  const today = getTodayKey();
+  return trades.filter(t => t.mode === 'real' && t.date === today);
+}
+
+function updateDailyCounter() {
+  const counter = document.getElementById('daily-counter');
+  const countEl = document.getElementById('daily-count');
+  if (currentMode !== 'real') { counter.style.display = 'none'; return; }
+  const todayTrades = getTodayRealTrades();
+  const n = todayTrades.length;
+  countEl.textContent = n;
+  counter.style.display = 'flex';
+  // Color
+  if (n === 0) { counter.style.border='1px solid rgba(16,185,129,0.3)'; counter.style.background='rgba(16,185,129,0.06)'; countEl.style.color='#10b981'; }
+  else if (n === 1) { counter.style.border='1px solid rgba(245,158,11,0.3)'; counter.style.background='rgba(245,158,11,0.06)'; countEl.style.color='#f59e0b'; }
+  else { counter.style.border='1px solid rgba(244,63,94,0.3)'; counter.style.background='rgba(244,63,94,0.06)'; countEl.style.color='#f43f5e'; }
+  updateDailyLimitBanner(todayTrades);
+}
+
+function updateDailyLimitBanner(todayTrades) {
+  const banner = document.getElementById('daily-limit-banner');
+  const msg = document.getElementById('daily-limit-msg');
+  if (currentMode !== 'real') { banner.style.display = 'none'; return; }
+  if (!todayTrades) todayTrades = getTodayRealTrades();
+  const n = todayTrades.length;
+  if (n >= 2) {
+    banner.style.display = '';
+    msg.textContent = '2 trades atteints — bonne journée, reviens demain ! 👋';
+    return;
+  }
+  // 1 trade taken — check if it was a TP
+  if (n === 1 && todayTrades[0].result === 'WIN') {
+    banner.style.display = '';
+    msg.textContent = 'TP atteint — objectif du jour rempli, protège ton capital ! 🎯';
+    return;
+  }
+  banner.style.display = 'none';
+}
+
+function isDailyLimitReached() {
+  if (currentMode !== 'real') return false;
+  const today = getTodayRealTrades();
+  if (today.length >= 2) return true;
+  if (today.length === 1 && today[0].result === 'WIN') return true;
+  return false;
+}
+
+// ═══════════════════════════════════
 //  TABS
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 function showTab(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + tab).classList.add('active');
-  const tabs = ['checklist','position','stats','journal'];
-  document.querySelectorAll('.tab-btn')[tabs.indexOf(tab)].classList.add('active');
+  document.getElementById('page-'+tab).classList.add('active');
+  ['checklist','position','stats','journal'].forEach((t,i) => {
+    if (t === tab) document.querySelectorAll('.tab-btn')[i].classList.add('active');
+  });
   if (tab === 'stats') refreshStats();
   if (tab === 'journal') refreshJournal();
 }
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  TIMER
-// ═══════════════════════════════════════
-function timeStrToSec(str) {
-  const [h, m] = str.split(':').map(Number);
-  return h * 3600 + m * 60;
-}
-function nowSec() {
-  const n = new Date();
-  return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
-}
-function fmtCountdown(sec) {
-  const m = String(Math.floor(sec / 60)).padStart(2, '0');
-  const s = String(sec % 60).padStart(2, '0');
-  return `${m}:${s}`;
-}
+// ═══════════════════════════════════
+function timeStrToSec(str) { const [h,m] = str.split(':').map(Number); return h*3600+m*60; }
+function nowSec() { const n = new Date(); return n.getHours()*3600+n.getMinutes()*60+n.getSeconds(); }
+function fmtCountdown(sec) { return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0'); }
 
-function onDxyTimeChange() {
-  const val = document.getElementById('dxy-time').value;
-  document.getElementById('btn-start').disabled = !val;
+function onFirstTimeChange() {
+  document.getElementById('btn-start').disabled = !document.getElementById('first-time').value;
   if (timerState !== 'idle') resetAll();
 }
 
 function startTimer() {
-  const sweepStr = document.getElementById('dxy-time').value;
+  const sweepStr = document.getElementById('first-time').value;
   if (!sweepStr) return;
-  const sweepSec = timeStrToSec(sweepStr);
-  const elapsed = nowSec() - sweepSec;
-  const left = TIMER_DURATION - elapsed;
+
+  // In real mode, check if sweep time is within killzone (07:00–11:00)
+  if (currentMode === 'real') {
+    const sweepH = parseInt(sweepStr.split(':')[0]);
+    if (sweepH < 7 || sweepH >= 11) {
+      alert('⛔ En mode Réel, le sweep doit être dans la killzone (07h–11h).');
+      return;
+    }
+  }
+
+  const elapsed = nowSec() - timeStrToSec(sweepStr);
+  const left = timerDuration - elapsed;
   if (left <= 0) { expireTimer(); return; }
   remaining = Math.floor(left);
   timerState = 'running';
-  checks.dxy = true;
-  document.getElementById('dxy-time').disabled = true;
+  checks.first = true;
+  document.getElementById('first-time').disabled = true;
   document.getElementById('btn-start').style.display = 'none';
   document.getElementById('btn-reset').style.display = '';
   document.getElementById('progress-wrap').style.display = '';
   document.getElementById('timer-inline').classList.add('visible');
-  updateCheckUI('dxy');
-  updateTimerColor();
+  updateCheckUI('first');
   timerInterval = setInterval(timerTick, 1000);
   timerTick();
 }
 
 function timerTick() {
-  const sweepStr = document.getElementById('dxy-time').value;
-  const sweepSec = timeStrToSec(sweepStr);
-  const elapsed = nowSec() - sweepSec;
-  const left = TIMER_DURATION - elapsed;
+  const sweepStr = document.getElementById('first-time').value;
+  const left = timerDuration - (nowSec() - timeStrToSec(sweepStr));
   if (left <= 0) { expireTimer(); return; }
   remaining = Math.floor(left);
-  const pct = remaining / TIMER_DURATION;
+  const pct = remaining / timerDuration;
   const color = pct > 0.4 ? '#10b981' : pct > 0.15 ? '#f59e0b' : '#f43f5e';
   document.getElementById('timer-display').textContent = fmtCountdown(remaining);
   document.getElementById('timer-display').style.color = color;
   document.getElementById('timer-badge-text').textContent = fmtCountdown(remaining);
   document.getElementById('timer-badge-text').style.color = color;
   document.getElementById('badge-dot').style.background = color;
-  document.getElementById('badge-dot').style.boxShadow = `0 0 6px ${color}`;
-  document.getElementById('timer-badge').style.borderColor = color + '55';
-  document.getElementById('timer-badge').style.background = color + '11';
+  document.getElementById('badge-dot').style.boxShadow = '0 0 6px '+color;
+  document.getElementById('timer-badge').style.borderColor = color+'55';
+  document.getElementById('timer-badge').style.background = color+'11';
   document.getElementById('timer-badge').style.display = 'flex';
-  document.getElementById('progress-fill').style.width = (pct * 100) + '%';
+  document.getElementById('progress-fill').style.width = (pct*100)+'%';
   document.getElementById('progress-fill').style.background = color;
-  document.getElementById('progress-pct').textContent = Math.round(pct * 100) + '%';
+  document.getElementById('progress-pct').textContent = Math.round(pct*100)+'%';
   document.getElementById('progress-pct').style.color = color;
 }
 
 function expireTimer() {
-  clearInterval(timerInterval);
-  timerState = 'expired';
-  remaining = 0;
-  checks = { dxy: false, eurusd: false, fvg: false, ifvg: false };
-  // DXY card expired state
-  document.getElementById('item-dxy').classList.add('expired-item');
-  document.getElementById('cb-dxy').classList.add('expired');
-  document.getElementById('lbl-dxy').classList.add('expired-label');
+  clearInterval(timerInterval); timerState = 'expired'; remaining = 0;
+  checks = {first:false,second:false,fvg:false,ifvg:false}; aplussActive = false; goldenActive = false;
+  document.getElementById('item-first').classList.add('expired-item');
+  document.getElementById('cb-first').classList.add('expired');
+  document.getElementById('lbl-first').classList.add('expired-label');
   document.getElementById('timer-inline').classList.remove('visible');
   document.getElementById('expired-label').style.display = '';
-  document.getElementById('timer-display').textContent = '00:00';
-  // Panel
-  document.getElementById('dxy-panel').classList.add('expired-panel');
+  document.getElementById('first-panel').classList.add('expired-panel');
   document.getElementById('progress-wrap').style.display = 'none';
   document.getElementById('expired-msg').style.display = '';
-  // Header
   document.getElementById('timer-badge').style.display = 'none';
   document.getElementById('expired-badge').style.display = '';
-  // Lock all others
-  ['eurusd','fvg','ifvg'].forEach(k => {
-    document.getElementById('item-'+k).classList.remove('checked');
-    document.getElementById('item-'+k).classList.add('locked');
-    document.getElementById('cb-'+k).classList.remove('checked');
-    document.getElementById('lock-'+k).style.display = '';
-    document.getElementById('lbl-'+k).classList.remove('checked-label');
-    document.getElementById('num-'+k).classList.remove('active-num');
-  });
+  document.getElementById('fvg-aplus-panel').style.display = 'none';
+  document.getElementById('second-panel').style.display = 'none';
+  ['second','fvg','ifvg'].forEach(k => lockItem(k));
   document.getElementById('setup-valid').classList.remove('visible');
   updatePositionTab();
 }
 
 function resetAll() {
-  clearInterval(timerInterval);
-  timerState = 'idle';
-  remaining = TIMER_DURATION;
-  checks = { dxy: false, eurusd: false, fvg: false, ifvg: false };
-  // Reset DXY card
-  document.getElementById('item-dxy').classList.remove('expired-item','checked');
-  document.getElementById('cb-dxy').classList.remove('checked','expired');
-  document.getElementById('lbl-dxy').classList.remove('expired-label','checked-label');
-  document.getElementById('num-dxy').classList.remove('active-num');
+  clearInterval(timerInterval); timerState = 'idle';
+  remaining = timerDuration;
+  checks = {first:false,second:false,fvg:false,ifvg:false}; aplussActive = false; goldenActive = false;
+  // First item
+  document.getElementById('item-first').classList.remove('expired-item','checked');
+  document.getElementById('cb-first').classList.remove('checked','expired');
+  document.getElementById('lbl-first').classList.remove('expired-label','checked-label');
+  document.getElementById('num-first').classList.remove('active-num');
   document.getElementById('timer-inline').classList.remove('visible');
   document.getElementById('expired-label').style.display = 'none';
-  document.getElementById('dxy-time').value = '';
-  document.getElementById('dxy-time').disabled = false;
-  document.getElementById('btn-start').style.display = '';
-  document.getElementById('btn-start').disabled = true;
+  document.getElementById('first-time').value = ''; document.getElementById('first-time').disabled = false;
+  document.getElementById('btn-start').style.display = ''; document.getElementById('btn-start').disabled = true;
   document.getElementById('btn-reset').style.display = 'none';
   document.getElementById('progress-wrap').style.display = 'none';
   document.getElementById('expired-msg').style.display = 'none';
-  document.getElementById('dxy-panel').classList.remove('expired-panel');
-  // Header
+  document.getElementById('first-panel').classList.remove('expired-panel');
+  document.getElementById('timer-display').textContent = sweeper === 'dxy' ? '25:00' : '15:00';
+  document.getElementById('timer-display').style.color = '#10b981';
+  // Header badges
   document.getElementById('timer-badge').style.display = 'none';
   document.getElementById('expired-badge').style.display = 'none';
-  // Other items
-  ['eurusd','fvg','ifvg'].forEach(k => {
-    document.getElementById('item-'+k).classList.remove('checked');
-    document.getElementById('item-'+k).classList.add('locked');
-    document.getElementById('cb-'+k).classList.remove('checked');
-    document.getElementById('row-'+k).className = 'check-row locked-cursor';
-    document.getElementById('lock-'+k).style.display = '';
-    document.getElementById('lbl-'+k).classList.remove('checked-label');
-    document.getElementById('num-'+k).classList.remove('active-num');
-  });
+  // Second + others
+  document.getElementById('second-panel').style.display = 'none';
+  document.getElementById('second-time').value = '';
+  document.getElementById('fvg-aplus-panel').style.display = 'none';
+  document.getElementById('item-fvg').classList.remove('aplus');
+  document.getElementById('aplus-box').classList.remove('checked');
+  document.getElementById('aplus-text').classList.remove('active');
+  document.getElementById('aplus-check').classList.remove('active');
+  document.getElementById('golden-badge').style.display = 'none';
+  document.getElementById('item-second').classList.remove('golden');
+  document.getElementById('golden-hint').textContent = 'Entre 08:00 et 08:59 → ⚡ Golden Setup';
+  document.getElementById('golden-hint').style.color = '#475569';
+  document.getElementById('golden-hint').style.fontWeight = '';
+  ['second','fvg','ifvg'].forEach(k => lockItem(k));
   document.getElementById('setup-valid').classList.remove('visible');
+  document.getElementById('aplus-label').classList.remove('visible');
   updatePositionTab();
 }
 
-// ═══════════════════════════════════════
+function lockItem(key) {
+  document.getElementById('item-'+key).classList.remove('checked','golden','aplus');
+  document.getElementById('item-'+key).classList.add('locked');
+  document.getElementById('cb-'+key).classList.remove('checked');
+  document.getElementById('row-'+key).className = 'check-row locked-cursor';
+  const lock = document.getElementById('lock-'+key);
+  if (lock) lock.style.display = '';
+  document.getElementById('lbl-'+key).classList.remove('checked-label');
+  document.getElementById('num-'+key).classList.remove('active-num');
+}
+
+// ═══════════════════════════════════
 //  CHECKLIST
-// ═══════════════════════════════════════
-const ORDER = ['dxy','eurusd','fvg','ifvg'];
+// ═══════════════════════════════════
+const ORDER = ['first','second','fvg','ifvg'];
 
 function toggleCheck(key) {
-  if (timerState === 'expired') return;
-  if (key === 'dxy') return;
-  if (key === 'eurusd' && timerState !== 'running') return;
+  if (timerState === 'expired' || key === 'first') return;
+  if (key === 'second' && timerState !== 'running') return;
   const idx = ORDER.indexOf(key);
-  const prev = ORDER[idx - 1];
-  if (prev && !checks[prev]) return;
+  if (idx > 0 && !checks[ORDER[idx-1]]) return;
   checks[key] = !checks[key];
-  // Uncheck subsequent if unchecking
   if (!checks[key]) {
-    for (let i = idx + 1; i < ORDER.length; i++) checks[ORDER[i]] = false;
+    for (let i = idx+1; i < ORDER.length; i++) checks[ORDER[i]] = false;
+    if (key === 'fvg') { aplussActive = false; updateAplus(); }
+    if (key === 'second') { goldenActive = false; updateGolden(); }
   }
   ORDER.forEach(k => updateCheckUI(k));
+  document.getElementById('fvg-aplus-panel').style.display = checks.fvg ? '' : 'none';
+  document.getElementById('second-panel').style.display = checks.second ? '' : 'none';
+  if (!checks.fvg) { aplussActive = false; updateAplus(); }
+  if (!checks.second) { goldenActive = false; updateGolden(); }
   checkAllDone();
 }
 
 function updateCheckUI(key) {
   const checked = checks[key];
   const idx = ORDER.indexOf(key);
-  const prev = idx === 0 ? true : checks[ORDER[idx - 1]];
-  const locked = !prev || (key === 'eurusd' && timerState !== 'running') || timerState === 'expired';
-  const item = document.getElementById('item-' + key);
-  const cb = document.getElementById('cb-' + key);
-  const lbl = document.getElementById('lbl-' + key);
-  const num = document.getElementById('num-' + key);
-  const lock = document.getElementById('lock-' + key);
-  const row = document.getElementById('row-' + key);
-  if (!item) return;
-  if (key !== 'dxy') {
+  const prevOk = idx === 0 ? true : checks[ORDER[idx-1]];
+  const locked = (!prevOk || (key === 'second' && timerState !== 'running') || timerState === 'expired') && key !== 'first';
+  if (key !== 'first') {
+    const item = document.getElementById('item-'+key);
     item.classList.toggle('checked', checked);
     item.classList.toggle('locked', !checked && locked);
-    cb.classList.toggle('checked', checked);
-    lbl.classList.toggle('checked-label', checked);
-    num.classList.toggle('active-num', checked);
-    if (lock) lock.style.display = locked && !checked ? '' : 'none';
-    if (row) row.className = 'check-row ' + (locked && !checked ? 'locked-cursor' : checked ? '' : 'pointer-cursor');
+    document.getElementById('cb-'+key).classList.toggle('checked', checked);
+    document.getElementById('lbl-'+key).classList.toggle('checked-label', checked);
+    document.getElementById('num-'+key).classList.toggle('active-num', checked);
+    const lock = document.getElementById('lock-'+key);
+    if (lock) lock.style.display = (locked && !checked) ? '' : 'none';
+    document.getElementById('row-'+key).className = 'check-row'+(locked && !checked ? ' locked-cursor' : '');
   } else {
-    item.classList.toggle('checked', checked);
-    cb.classList.toggle('checked', checked);
-    lbl.classList.toggle('checked-label', checked);
-    num.classList.toggle('active-num', checked);
+    document.getElementById('item-first').classList.toggle('checked', checked);
+    document.getElementById('cb-first').classList.toggle('checked', checked);
+    document.getElementById('lbl-first').classList.toggle('checked-label', checked);
+    document.getElementById('num-first').classList.toggle('active-num', checked);
   }
+}
+
+// ═══════════════════════════════════
+//  GOLDEN SETUP
+// ═══════════════════════════════════
+function checkGolden() {
+  // Golden only applies when EURUSD is in second slot (DXY sweeps first)
+  if (sweeper !== 'dxy') { goldenActive = false; updateGolden(); return; }
+  const val = document.getElementById('second-time').value;
+  if (!val) { goldenActive = false; updateGolden(); return; }
+  goldenActive = (parseInt(val.split(':')[0]) === 8);
+  updateGolden();
+}
+
+function updateGolden() {
+  const item = document.getElementById('item-second');
+  const badge = document.getElementById('golden-badge');
+  const hint = document.getElementById('golden-hint');
+  item.classList.toggle('golden', goldenActive);
+  badge.style.display = (goldenActive && sweeper === 'dxy') ? '' : 'none';
+  if (sweeper === 'dxy') {
+    if (goldenActive) {
+      hint.textContent = '⚡ Golden Setup détecté !';
+      hint.style.color = '#fbbf24'; hint.style.fontWeight = '700';
+    } else {
+      hint.textContent = 'Entre 08:00 et 08:59 → ⚡ Golden Setup';
+      hint.style.color = '#475569'; hint.style.fontWeight = '';
+    }
+  }
+  checkAllDone();
+}
+
+// ═══════════════════════════════════
+//  A++
+// ═══════════════════════════════════
+function toggleAplus(e) {
+  e.stopPropagation();
+  if (!checks.fvg) return;
+  aplussActive = !aplussActive;
+  updateAplus();
+  checkAllDone();
+}
+
+function updateAplus() {
+  document.getElementById('aplus-box').classList.toggle('checked', aplussActive);
+  document.getElementById('aplus-text').classList.toggle('active', aplussActive);
+  document.getElementById('aplus-check').classList.toggle('active', aplussActive);
+  document.getElementById('item-fvg').classList.toggle('aplus', aplussActive);
+  document.getElementById('aplus-label').classList.toggle('visible', aplussActive);
 }
 
 function checkAllDone() {
   const done = ORDER.every(k => checks[k]);
   document.getElementById('setup-valid').classList.toggle('visible', done);
+  if (done && goldenActive && aplussActive) {
+    document.getElementById('setup-valid-title').textContent = '⚡⭐ GOLDEN + A++ — Setup parfait !';
+  } else if (done && goldenActive) {
+    document.getElementById('setup-valid-title').textContent = '⚡ Golden Setup validé — Prise de liq. EURUSD à 8h !';
+  } else if (done && aplussActive) {
+    document.getElementById('setup-valid-title').textContent = '⭐ Setup A++ validé — IFVG confluent !';
+  } else if (done) {
+    document.getElementById('setup-valid-title').textContent = '✅ Setup validé — IFVG confirmé';
+  }
   updatePositionTab();
 }
 
 function updatePositionTab() {
   const done = ORDER.every(k => checks[k]);
   const btn = document.getElementById('tab-position');
-  btn.disabled = !done;
-  btn.style.opacity = done ? '1' : '0.35';
-  btn.style.cursor = done ? 'pointer' : 'not-allowed';
-  if (done) {
-    btn.innerHTML = 'Prise de position <span class="tab-badge" style="background:#06b6d4;color:#0a0f1e;">✓</span>';
+  btn.disabled = !done; btn.style.opacity = done ? '1' : '0.35'; btn.style.cursor = done ? 'pointer' : 'not-allowed';
+  btn.innerHTML = done ? 'Prise de position <span class="tab-badge" style="background:#06b6d4;color:#0a0f1e;">✓</span>' : 'Prise de position';
+}
+
+// ═══════════════════════════════════
+//  INIT
+// ═══════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  document.getElementById('f-date').value = now.toISOString().slice(0,10);
+  document.getElementById('f-time').value = now.toTimeString().slice(0,5);
+  startClock();
+  refreshStats();
+  refreshJournal();
+  updateTabBadge();
+});
+
+// ═══════════════════════════════════
+//  MODE
+// ═══════════════════════════════════
+function setMode(mode) {
+  currentMode = mode;
+  const btBtn = document.getElementById('btn-bt');
+  const realBtn = document.getElementById('btn-real');
+  btBtn.className = 'mode-btn' + (mode === 'backtest' ? ' active-bt' : '');
+  realBtn.className = 'mode-btn' + (mode === 'real' ? ' active-real' : '');
+  const toggle = document.getElementById('mode-toggle');
+  toggle.style.borderColor = mode === 'backtest' ? '#8b5cf6' : '#f59e0b';
+  setTimeout(() => toggle.style.borderColor = '#1e293b', 800);
+  updateClock(); // rafraîchit horloge + warning immédiatement
+}
+
+// ═══════════════════════════════════
+//  CLOCK + SESSION WARNING
+// ═══════════════════════════════════
+function startClock() {
+  updateClock();
+  clockInterval = setInterval(updateClock, 1000);
+}
+
+function updateClock() {
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  const timeStr = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  const totalMin = h * 60 + m;
+  const clock = document.getElementById('session-clock');
+  const clockTime = document.getElementById('clock-time');
+  const clockLabel = document.getElementById('clock-label');
+  const warning = document.getElementById('session-warning');
+  clockTime.textContent = timeStr;
+
+  // En backtest : horloge toujours verte, aucun warning
+  if (currentMode === 'backtest') {
+    clock.className = 'clock-wrap clock-green';
+    clockLabel.textContent = '🔬 Mode Backtest';
+    warning.style.display = 'none';
+    return;
+  }
+
+  // En réel : color logic normale
+  if (totalMin >= 11 * 60) {
+    clock.className = 'clock-wrap clock-red';
+    clockLabel.textContent = '⛔ Session terminée';
+    warning.className = 'sw-red';
+    warning.style.display = 'flex';
+    warning.innerHTML = '🔴 <span>Il est ' + timeStr.slice(0,5) + ' — Session terminée, le trade est très risqué.</span>';
+  } else if (totalMin >= 10 * 60 + 30) {
+    clock.className = 'clock-wrap clock-orange';
+    const minsLeft = (11 * 60) - totalMin;
+    clockLabel.textContent = '⚠️ Fin de session dans ' + minsLeft + 'min';
+    warning.className = 'sw-orange';
+    warning.style.display = 'flex';
+    warning.innerHTML = '⚠️ <span>Approche de 11h00 — Trade plus risqué, sois vigilant. Fin de session dans <strong>' + minsLeft + ' min</strong>.</span>';
   } else {
-    btn.textContent = 'Prise de position';
+    clock.className = 'clock-wrap clock-green';
+    clockLabel.textContent = 'Session active';
+    warning.style.display = 'none';
   }
 }
 
-function updateTimerColor() {}
+// ═══════════════════════════════════
+//  TABS
+// ═══════════════════════════════════
+function showTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  ['checklist','position','stats','journal'].forEach((t,i) => {
+    if (t === tab) document.querySelectorAll('.tab-btn')[i].classList.add('active');
+  });
+  if (tab === 'stats') refreshStats();
+  if (tab === 'journal') refreshJournal();
+}
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  FORM
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 function setDirection(d) {
   direction = d;
-  document.getElementById('btn-long').className = 'toggle-btn' + (d === 'LONG' ? ' active-long' : '');
-  document.getElementById('btn-short').className = 'toggle-btn' + (d === 'SHORT' ? ' active-short' : '');
+  document.getElementById('btn-long').className = 'toggle-btn'+(d==='LONG'?' active-long':'');
+  document.getElementById('btn-short').className = 'toggle-btn'+(d==='SHORT'?' active-short':'');
 }
 function setResult(r) {
   result = r;
-  document.getElementById('btn-win').className = 'toggle-btn' + (r === 'WIN' ? ' active-win' : '');
-  document.getElementById('btn-loss').className = 'toggle-btn' + (r === 'LOSS' ? ' active-loss' : '');
-  document.getElementById('btn-be').className = 'toggle-btn' + (r === 'BE' ? ' active-be' : '');
+  document.getElementById('btn-win').className = 'toggle-btn'+(r==='WIN'?' active-win':'');
+  document.getElementById('btn-loss').className = 'toggle-btn'+(r==='LOSS'?' active-loss':'');
+  document.getElementById('btn-be').className = 'toggle-btn'+(r==='BE'?' active-be':'');
 }
 function calcRR() {
-  const entry = parseFloat(document.getElementById('f-entry').value);
+  const en = parseFloat(document.getElementById('f-entry').value);
   const sl = parseFloat(document.getElementById('f-sl').value);
   const tp = parseFloat(document.getElementById('f-tp').value);
   const el = document.getElementById('rr-display');
-  if (!isNaN(entry) && !isNaN(sl) && !isNaN(tp) && sl !== entry) {
-    const rr = Math.abs((tp - entry) / (entry - sl)).toFixed(2);
-    el.textContent = rr + 'R';
-    el.classList.add('has-value');
-    el.dataset.rr = rr;
-  } else {
-    el.textContent = 'Calculé automatiquement';
-    el.classList.remove('has-value');
-    el.dataset.rr = '';
-  }
+  if (!isNaN(en) && !isNaN(sl) && !isNaN(tp) && sl !== en) {
+    const rr = Math.abs((tp-en)/(en-sl)).toFixed(2);
+    el.textContent = rr+'R'; el.classList.add('has-value'); el.dataset.rr = rr;
+  } else { el.textContent = 'Calculé automatiquement'; el.classList.remove('has-value'); el.dataset.rr = ''; }
 }
 
 function submitTrade() {
-  const entry = document.getElementById('f-entry').value;
-  if (!entry) { document.getElementById('f-entry').focus(); return; }
+  if (!document.getElementById('f-entry').value) { document.getElementById('f-entry').focus(); return; }
+  if (isDailyLimitReached()) {
+    alert('🚫 Limite journalière atteinte en mode Réel. Reviens demain !');
+    return;
+  }
   const trade = {
     id: Date.now(),
+    mode: currentMode,
     date: document.getElementById('f-date').value,
     time: document.getElementById('f-time').value,
-    direction,
-    result,
+    direction, result,
     entry: document.getElementById('f-entry').value,
     sl: document.getElementById('f-sl').value,
     tp: document.getElementById('f-tp').value,
     rr: document.getElementById('rr-display').dataset.rr || '',
     notes: document.getElementById('f-notes').value,
-    checklist: { ...checks },
+    aplus: aplussActive,
+    golden: goldenActive,
+    checklist: {...checks},
   };
   trades.unshift(trade);
   localStorage.setItem('trading-trades', JSON.stringify(trades));
-  // Flash button
   const btn = document.getElementById('btn-submit');
-  btn.textContent = '✓ Trade enregistré !';
-  btn.classList.add('saved');
+  btn.textContent = '✓ Trade enregistré !'; btn.classList.add('saved');
   setTimeout(() => { btn.textContent = 'Enregistrer le trade'; btn.classList.remove('saved'); }, 2000);
-  // Reset form
   const now = new Date();
-  document.getElementById('f-date').value = now.toISOString().slice(0, 10);
-  document.getElementById('f-time').value = now.toTimeString().slice(0, 5);
+  document.getElementById('f-date').value = now.toISOString().slice(0,10);
+  document.getElementById('f-time').value = now.toTimeString().slice(0,5);
   document.getElementById('f-entry').value = '';
   document.getElementById('f-sl').value = '';
   document.getElementById('f-tp').value = '';
   document.getElementById('f-notes').value = '';
-  calcRR();
-  setDirection('LONG');
-  setResult('WIN');
-  resetAll();
-  updateTabBadge();
+  calcRR(); setDirection('LONG'); setResult('WIN'); resetAll();
+  updateTabBadge(); refreshStats(); updateDailyCounter();
+}
+
+// ═══════════════════════════════════
+//  STATS
+// ═══════════════════════════════════
+function setStatsFilter(f) {
+  statsFilter = f;
+  ['all','backtest','real'].forEach(x => document.getElementById('sf-'+x).classList.toggle('active', x===f));
   refreshStats();
 }
 
-// ═══════════════════════════════════════
-//  STATS
-// ═══════════════════════════════════════
 function refreshStats() {
-  const total = trades.length;
-  const wins = trades.filter(t => t.result === 'WIN').length;
-  const losses = trades.filter(t => t.result === 'LOSS').length;
-  const be = trades.filter(t => t.result === 'BE').length;
-  const longs = trades.filter(t => t.direction === 'LONG').length;
-  const shorts = trades.filter(t => t.direction === 'SHORT').length;
-  const avgRR = total > 0 ? (trades.reduce((a, t) => a + (parseFloat(t.rr) || 0), 0) / total).toFixed(2) : '—';
-  const winrate = total > 0 ? ((wins / total) * 100).toFixed(1) + '%' : '—';
-  document.getElementById('stats-sub').textContent = total > 0 ? `Basé sur ${total} trade${total > 1 ? 's' : ''} enregistré${total > 1 ? 's' : ''}` : 'Aucun trade enregistré pour l\'instant';
-  if (total === 0) {
-    document.getElementById('stats-content').style.display = 'none';
-    document.getElementById('stats-empty').style.display = '';
-    return;
-  }
-  document.getElementById('stats-content').style.display = '';
-  document.getElementById('stats-empty').style.display = 'none';
+  let data = trades;
+  if (statsFilter === 'backtest') data = trades.filter(t => t.mode === 'backtest');
+  if (statsFilter === 'real') data = trades.filter(t => t.mode === 'real');
+  const total = data.length;
+  const wins = data.filter(t => t.result==='WIN').length;
+  const losses = data.filter(t => t.result==='LOSS').length;
+  const be = data.filter(t => t.result==='BE').length;
+  const longs = data.filter(t => t.direction==='LONG').length;
+  const shorts = data.filter(t => t.direction==='SHORT').length;
+  const aplus = data.filter(t => t.aplus).length;
+  const golden = data.filter(t => t.golden).length;
+  const avgRR = total > 0 ? (data.reduce((a,t) => a+(parseFloat(t.rr)||0), 0)/total).toFixed(2) : '—';
+  const winrate = total > 0 ? ((wins/total)*100).toFixed(1)+'%' : '—';
+  document.getElementById('stats-sub').textContent = total > 0 ? `Basé sur ${total} trade${total>1?'s':''} — filtre : ${statsFilter==='all'?'tous':statsFilter}` : 'Aucun trade enregistré pour l\'instant';
+  if (total === 0) { document.getElementById('stats-content').style.display='none'; document.getElementById('stats-empty').style.display=''; return; }
+  document.getElementById('stats-content').style.display=''; document.getElementById('stats-empty').style.display='none';
   document.getElementById('s-winrate').textContent = winrate;
-  document.getElementById('s-rr').textContent = avgRR !== '—' ? avgRR + 'R' : '—';
+  document.getElementById('s-rr').textContent = avgRR!=='—' ? avgRR+'R' : '—';
   document.getElementById('s-total').textContent = total;
   document.getElementById('s-wins').textContent = wins;
   document.getElementById('s-losses').textContent = losses;
   document.getElementById('s-be').textContent = be;
   document.getElementById('s-long').textContent = longs;
   document.getElementById('s-short').textContent = shorts;
+  document.getElementById('s-aplus').textContent = aplus;
+  document.getElementById('s-golden').textContent = golden;
   document.getElementById('b-wins').textContent = wins;
   document.getElementById('b-losses').textContent = losses;
   document.getElementById('b-be').textContent = be;
-  document.getElementById('bf-wins').style.width = (wins / total * 100) + '%';
-  document.getElementById('bf-losses').style.width = (losses / total * 100) + '%';
-  document.getElementById('bf-be').style.width = (be / total * 100) + '%';
+  document.getElementById('bf-wins').style.width = (wins/total*100)+'%';
+  document.getElementById('bf-losses').style.width = (losses/total*100)+'%';
+  document.getElementById('bf-be').style.width = (be/total*100)+'%';
 }
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  JOURNAL
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
+function setJournalFilter(f) {
+  journalFilter = f;
+  ['all','backtest','real','aplus','golden'].forEach(x => document.getElementById('jf-'+x).classList.toggle('active', x===f));
+  refreshJournal();
+}
+
 function refreshJournal() {
+  let data = trades;
+  if (journalFilter === 'backtest') data = trades.filter(t => t.mode==='backtest');
+  if (journalFilter === 'real') data = trades.filter(t => t.mode==='real');
+  if (journalFilter === 'aplus') data = trades.filter(t => t.aplus);
+  if (journalFilter === 'golden') data = trades.filter(t => t.golden);
   const list = document.getElementById('trade-list');
   const empty = document.getElementById('journal-empty');
-  const sub = document.getElementById('journal-sub');
   const total = trades.length;
-  sub.textContent = total > 0 ? `${total} trade${total > 1 ? 's' : ''} enregistré${total > 1 ? 's' : ''}` : 'Aucun trade enregistré';
-  if (total === 0) { list.innerHTML = ''; empty.style.display = ''; return; }
+  document.getElementById('journal-sub').textContent = total > 0 ? `${total} trade${total>1?'s':''} enregistré${total>1?'s':''}` : 'Aucun trade enregistré';
+  if (data.length === 0) { list.innerHTML=''; empty.style.display=''; return; }
   empty.style.display = 'none';
-  list.innerHTML = trades.map(t => {
-    const rc = t.result === 'WIN' ? '#10b981' : t.result === 'LOSS' ? '#f43f5e' : '#f59e0b';
-    const dc = t.direction === 'LONG' ? '#10b981' : '#f43f5e';
-    const checks = Object.values(t.checklist || {}).filter(Boolean).length;
-    return `<div class="trade-card" style="border:1px solid ${rc}22;background:${rc}08;">
-      <div class="result-badge" style="background:${rc}22;color:${rc};">${t.result}</div>
+  const rc = t => t.result==='WIN'?'#10b981':t.result==='LOSS'?'#f43f5e':'#f59e0b';
+  const dc = t => t.direction==='LONG'?'#10b981':'#f43f5e';
+  const modeTag = t => t.mode==='real'
+    ? '<span class="mode-tag mode-tag-real">RÉEL</span>'
+    : '<span class="mode-tag mode-tag-bt">BACKTEST</span>';
+  const apluspTag = t => t.aplus ? '<span style="font-size:11px;color:#a78bfa;font-weight:700;margin-left:6px;">⭐ A++</span>' : '';
+  const goldenTag = t => t.golden ? '<span style="font-size:11px;color:#fbbf24;font-weight:700;margin-left:6px;">⚡ GOLDEN</span>' : '';
+  list.innerHTML = data.map(t => `
+    <div class="trade-card" style="border:1px solid ${rc(t)}22;background:${rc(t)}08;">
+      <div class="result-badge" style="background:${rc(t)}22;color:${rc(t)};">${t.result}</div>
       <div>
-        <div class="trade-main">EURUSD · <span style="color:${dc}">${t.direction}</span>${t.rr ? `<span style="color:#06b6d4;margin-left:8px;">${t.rr}R</span>` : ''}</div>
-        <div class="trade-meta">${t.date} ${t.time}${t.entry ? ' · Entrée : ' + t.entry : ''}${t.sl ? ' · SL : ' + t.sl : ''}${t.tp ? ' · TP : ' + t.tp : ''}</div>
-        ${t.notes ? `<div class="trade-notes">${t.notes}</div>` : ''}
+        <div class="trade-main">
+          ${modeTag(t)} EURUSD · <span style="color:${dc(t)}">${t.direction}</span>
+          ${t.rr?`<span style="color:#06b6d4;margin-left:6px;">${t.rr}R</span>`:''}
+          ${apluspTag(t)}
+          ${goldenTag(t)}
+        </div>
+        <div class="trade-meta">${t.date} ${t.time}${t.entry?' · Entrée : '+t.entry:''}${t.sl?' · SL : '+t.sl:''}${t.tp?' · TP : '+t.tp:''}</div>
+        ${t.notes?`<div class="trade-notes">${t.notes}</div>`:''}
       </div>
-      <div class="trade-checks">${checks}/4 ✓</div>
-      <button class="delete-btn" onclick="deleteTrade(${t.id})">×</button>
-    </div>`;
-  }).join('');
+      <div style="font-size:10px;color:#334155;text-align:right;">${Object.values(t.checklist||{}).filter(Boolean).length}/4 ✓</div>
+      <button class="delete-btn" onclick="askDelete(${t.id})">🗑️ Suppr.</button>
+    </div>`).join('');
 }
 
-function deleteTrade(id) {
-  trades = trades.filter(t => t.id !== id);
+// ═══════════════════════════════════
+//  DELETE
+// ═══════════════════════════════════
+function askDelete(id) {
+  pendingDeleteId = id;
+  document.getElementById('confirm-overlay').classList.add('visible');
+}
+function closeConfirm() {
+  pendingDeleteId = null;
+  document.getElementById('confirm-overlay').classList.remove('visible');
+}
+function confirmDelete() {
+  if (!pendingDeleteId) return;
+  trades = trades.filter(t => t.id !== pendingDeleteId);
   localStorage.setItem('trading-trades', JSON.stringify(trades));
-  refreshJournal();
-  refreshStats();
-  updateTabBadge();
+  pendingDeleteId = null;
+  document.getElementById('confirm-overlay').classList.remove('visible');
+  refreshJournal(); refreshStats(); updateTabBadge(); updateDailyCounter();
 }
 
 function updateTabBadge() {
-  const badge = document.getElementById('stats-badge');
-  if (trades.length > 0) {
-    badge.textContent = trades.length;
-    badge.style.display = 'inline-block';
-  } else {
-    badge.style.display = 'none';
-  }
+  const n = trades.length;
+  ['stats-badge','journal-badge'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = n; el.style.display = n > 0 ? 'inline-block' : 'none';
+  });
 }
 </script>
 </body>
