@@ -244,6 +244,20 @@
     .empty { text-align:center; padding:60px 0; color:#334155; font-size:14px; }
     .empty-icon { font-size:40px; margin-bottom:12px; }
 
+    /* NO TRADE REASON BUTTONS */
+    .notrade-reason-btn { padding:10px 14px; border-radius:8px; border:1.5px solid #1e293b; background:rgba(255,255,255,0.02); color:#94a3b8; font-size:13px; font-weight:600; cursor:pointer; text-align:left; transition:all 0.15s; }
+    .notrade-reason-btn:hover { border-color:#334155; }
+    .notrade-reason-btn.selected { border-color:#64748b; background:rgba(100,116,139,0.15); color:#e2e8f0; }
+
+    /* EMOTIONAL CHECKLIST */
+    .emo-q { padding:12px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); }
+    .emo-q.answered-ok { border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.04); }
+    .emo-q.answered-warn { border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.04); }
+    .emo-btn { flex:1; padding:8px 0; border-radius:7px; border:1.5px solid #1e293b; background:rgba(255,255,255,0.02); color:#94a3b8; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.15s; }
+    .emo-btn:hover { border-color:#334155; }
+    .emo-btn.selected-ok { border-color:#10b981; background:rgba(16,185,129,0.15); color:#10b981; }
+    .emo-btn.selected-warn { border-color:#f59e0b; background:rgba(245,158,11,0.15); color:#f59e0b; }
+
     /* CONFIRM DIALOG */
     .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; }
     .overlay.visible { display:flex; }
@@ -337,6 +351,11 @@
         <span id="daily-count" style="font-size:15px;font-weight:800;">0</span>
         <span style="font-size:11px;color:#64748b;">/2</span>
       </div>
+      <!-- FOREX FACTORY NEWS LINK -->
+      <a href="https://www.forexfactory.com/calendar" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);color:#94a3b8;font-size:12px;font-weight:600;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.borderColor='rgba(59,130,246,0.4)';this.style.color='#3b82f6';" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.color='#94a3b8';">
+        📰 ForexFactory <span style="font-size:10px;">↗</span>
+      </a>
+
       <div class="mode-toggle" id="mode-toggle">
         <button class="mode-btn active-bt" id="btn-bt" onclick="setMode('backtest')">🔬 BACKTEST</button>
         <button class="mode-btn" id="btn-real" onclick="setMode('real')">🔴 RÉEL</button>
@@ -391,6 +410,33 @@
       <button class="sweeper-btn" id="sw-same" onclick="setSweeper('same')">
         <span style="font-size:13px;">⚡</span> En même temps
       </button>
+    </div>
+
+    <!-- NO TRADE TODAY tag -->
+    <div style="margin-bottom:18px;">
+      <button onclick="openNoTradeModal()" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(100,116,139,0.3);background:rgba(100,116,139,0.06);color:#94a3b8;font-size:12px;font-weight:600;cursor:pointer;">
+        📋 Pas de trade aujourd'hui — noter pourquoi
+      </button>
+    </div>
+
+    <!-- NO TRADE MODAL -->
+    <div class="overlay" id="notrade-overlay">
+      <div class="dialog" style="max-width:380px;text-align:left;">
+        <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">📋 Journée sans trade</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:18px;">Pourquoi tu n'as pas tradé aujourd'hui ?</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;" id="notrade-reasons">
+          <button class="notrade-reason-btn" onclick="selectNoTradeReason('Pas de setup valide')">Pas de setup valide</button>
+          <button class="notrade-reason-btn" onclick="selectNoTradeReason('Indécis / pas confiant')">Indécis / pas confiant</button>
+          <button class="notrade-reason-btn" onclick="selectNoTradeReason('Heure ratée')">Heure ratée</button>
+          <button class="notrade-reason-btn" onclick="selectNoTradeReason('Hors session / indisponible')">Hors session / indisponible</button>
+          <button class="notrade-reason-btn" onclick="selectNoTradeReason('Fatigue / état émotionnel')">Fatigue / état émotionnel</button>
+        </div>
+        <textarea id="notrade-note" class="input" rows="2" placeholder="Note additionnelle (optionnel)" style="margin-bottom:16px;"></textarea>
+        <div class="dialog-btns">
+          <button class="btn-cancel" onclick="closeNoTradeModal()">Annuler</button>
+          <button class="btn-danger" style="background:rgba(100,116,139,0.15);border-color:rgba(100,116,139,0.4);color:#94a3b8;" onclick="saveNoTradeDay()">Enregistrer</button>
+        </div>
+      </div>
     </div>
 
     <div class="checklist">
@@ -555,7 +601,43 @@
         <div id="aplus-label">⭐ Confluence A++ détectée — IFVG DXY + EURUSD</div>
         <div style="font-size:12px;color:#64748b;margin-top:2px;">Tu peux accéder à la prise de position</div>
       </div>
-      <button class="btn btn-primary" onclick="showTab('position')">Enregistrer →</button>
+      <button class="btn btn-primary" onclick="goToPosition()">Enregistrer →</button>
+    </div>
+  </div>
+
+  <!-- EMOTIONAL CHECKLIST MODAL (réel uniquement) -->
+  <div class="overlay" id="emo-overlay">
+    <div class="dialog" style="max-width:380px;text-align:left;">
+      <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">🧠 Check rapide avant d'entrer</div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:20px;">30 secondes pour éviter une erreur émotionnelle</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+        <div class="emo-q" data-q="calm">
+          <div style="font-size:13px;color:#e2e8f0;margin-bottom:8px;">Es-tu calme et concentré, sans stress externe ?</div>
+          <div style="display:flex;gap:8px;">
+            <button class="emo-btn" onclick="setEmoAnswer('calm', true)">✓ Oui</button>
+            <button class="emo-btn" onclick="setEmoAnswer('calm', false)">✕ Non</button>
+          </div>
+        </div>
+        <div class="emo-q" data-q="revenge">
+          <div style="font-size:13px;color:#e2e8f0;margin-bottom:8px;">As-tu déjà perdu un trade aujourd'hui ?</div>
+          <div style="display:flex;gap:8px;">
+            <button class="emo-btn" onclick="setEmoAnswer('revenge', false)">Non</button>
+            <button class="emo-btn" onclick="setEmoAnswer('revenge', true)">Oui</button>
+          </div>
+        </div>
+        <div class="emo-q" data-q="plan">
+          <div style="font-size:13px;color:#e2e8f0;margin-bottom:8px;">Ce trade respecte-t-il ton plan à 100% (pas d'improvisation) ?</div>
+          <div style="display:flex;gap:8px;">
+            <button class="emo-btn" onclick="setEmoAnswer('plan', true)">✓ Oui</button>
+            <button class="emo-btn" onclick="setEmoAnswer('plan', false)">✕ Non</button>
+          </div>
+        </div>
+      </div>
+      <div id="emo-warning" style="display:none;margin-bottom:16px;padding:12px 14px;border-radius:8px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);font-size:12px;color:#f59e0b;font-weight:600;"></div>
+      <div class="dialog-btns">
+        <button class="btn-cancel" onclick="closeEmoModal()">Annuler</button>
+        <button class="btn-danger" id="emo-continue-btn" style="background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.4);color:#10b981;" onclick="confirmEmoAndContinue()" disabled>Continuer →</button>
+      </div>
     </div>
   </div>
 
@@ -639,10 +721,11 @@
   <div class="page" id="page-stats">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
       <div class="page-title" style="margin-bottom:0;">Statistiques</div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="filter-btn active" id="sf-all" onclick="setStatsFilter('all')">Tous</button>
         <button class="filter-btn" id="sf-backtest" onclick="setStatsFilter('backtest')">🔬 Backtest</button>
         <button class="filter-btn" id="sf-real" onclick="setStatsFilter('real')">🔴 Réel</button>
+        <button class="filter-btn" onclick="exportMonthlyReport()" style="border-color:rgba(6,182,212,0.3);color:#06b6d4;">📄 Export PDF du mois</button>
       </div>
     </div>
     <div class="page-sub" id="stats-sub">Aucun trade enregistré pour l'instant</div>
@@ -725,6 +808,41 @@
         </div>
         <div id="winrate-bars"></div>
         <div id="winrate-empty" style="display:none;text-align:center;padding:30px 0;color:#334155;font-size:12px;">Pas encore assez de trades pour afficher une tendance.</div>
+      </div>
+
+      <!-- STREAK TRACKER -->
+      <div class="chart-box">
+        <div class="chart-title">🔥 Série en cours</div>
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div id="streak-value" style="font-size:36px;font-weight:800;line-height:1;">—</div>
+            <div id="streak-label" style="font-size:11px;color:#475569;margin-top:4px;text-transform:uppercase;letter-spacing:0.06em;">trades</div>
+          </div>
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Meilleure série / pire série</div>
+            <div style="display:flex;gap:16px;">
+              <div><span style="color:#10b981;font-weight:700;font-size:15px;" id="streak-best">—</span> <span style="font-size:11px;color:#475569;">wins</span></div>
+              <div><span style="color:#f43f5e;font-weight:700;font-size:15px;" id="streak-worst">—</span> <span style="font-size:11px;color:#475569;">losses</span></div>
+            </div>
+          </div>
+        </div>
+        <div id="streak-warning" style="display:none;margin-top:14px;padding:10px 14px;border-radius:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);font-size:12px;color:#f59e0b;font-weight:600;"></div>
+      </div>
+
+      <!-- HEATMAP HEURE x JOUR -->
+      <div class="chart-box">
+        <div class="chart-title">🗓️ Performance par jour & heure</div>
+        <div style="font-size:11px;color:#475569;margin-bottom:12px;">Win rate par heure d'entrée et jour de la semaine</div>
+        <div id="heatmap-container" style="overflow-x:auto;"></div>
+        <div id="heatmap-empty" style="display:none;text-align:center;padding:30px 0;color:#334155;font-size:12px;">Pas assez de trades pour générer la heatmap.</div>
+      </div>
+
+      <!-- BACKTEST VS RÉEL -->
+      <div class="chart-box">
+        <div class="chart-title">⚖️ Backtest vs Réel</div>
+        <div style="font-size:11px;color:#475569;margin-bottom:14px;">Tes résultats réels suivent-ils ton backtest ?</div>
+        <div id="bt-vs-real"></div>
+        <div id="bt-vs-real-empty" style="display:none;text-align:center;padding:30px 0;color:#334155;font-size:12px;">Besoin de trades en Backtest ET en Réel pour comparer.</div>
       </div>
 
       <!-- CALENDRIER -->
@@ -879,7 +997,7 @@ window.addEventListener('DOMContentLoaded', () => {
 //  SWEEPER SELECTOR
 // ═══════════════════════════════════
 function setSweeper(s) {
-  if (timerState !== 'idle') resetAll();
+  if (timerState !== 'idle') resetAll(true);
   sweeper = s;
   timerDuration = s === 'eurusd' ? TIMER_EURUSD_FIRST : 25 * 60;
   remaining = timerDuration;
@@ -928,7 +1046,7 @@ function setMode(mode) {
   if (mode === currentMode) return;
   currentMode = mode;
   // Clean slate when switching modes — avoids backtest deadline state leaking into real mode or vice versa
-  if (timerState !== 'idle') resetAll();
+  if (timerState !== 'idle') resetAll(true);
   document.getElementById('btn-bt').className   = 'mode-btn' + (mode === 'backtest' ? ' active-bt'   : '');
   document.getElementById('btn-real').className = 'mode-btn' + (mode === 'real'     ? ' active-real' : '');
   const toggle = document.getElementById('mode-toggle');
@@ -1147,12 +1265,12 @@ function onFirstTimeChange() {
   const val = document.getElementById('first-time').value;
   document.getElementById('btn-start').disabled = !val;
   if (!val) {
-    if (timerState !== 'idle') resetAll();
+    if (timerState !== 'idle') resetAll(true);
     goldenActive = false; updateGolden();
     return;
   }
   if (currentMode === 'backtest') {
-    if (timerState !== 'idle') resetAll();
+    if (timerState !== 'idle') resetAll(true);
     showBacktestDeadline(val);
   }
   checkGolden(); // check golden on every time change
@@ -1269,9 +1387,49 @@ function expireTimer() {
   ['second','fvg','ifvg'].forEach(k => lockItem(k));
   document.getElementById('setup-valid').classList.remove('visible');
   updatePositionTab();
+  if (currentMode === 'real') startFomoLock();
 }
 
-function resetAll() {
+// ═══════════════════════════════════
+//  ANTI-FOMO LOCK (réel uniquement)
+// ═══════════════════════════════════
+const FOMO_LOCK_DURATION = 5 * 60; // 5 minutes
+let fomoLockUntil = null;
+let fomoLockInterval = null;
+
+function startFomoLock() {
+  fomoLockUntil = Date.now() + FOMO_LOCK_DURATION * 1000;
+  document.getElementById('btn-reset').disabled = true;
+  document.getElementById('btn-reset').style.opacity = '0.4';
+  document.getElementById('btn-reset').style.cursor = 'not-allowed';
+  clearInterval(fomoLockInterval);
+  fomoLockInterval = setInterval(updateFomoLockUI, 1000);
+  updateFomoLockUI();
+}
+
+function updateFomoLockUI() {
+  const btn = document.getElementById('btn-reset');
+  if (!fomoLockUntil) return;
+  const left = Math.ceil((fomoLockUntil - Date.now()) / 1000);
+  if (left <= 0) {
+    clearInterval(fomoLockInterval);
+    fomoLockUntil = null;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+    btn.textContent = '↺ Reset';
+    return;
+  }
+  btn.textContent = `🔒 Patience… ${fmtCountdown(left)}`;
+}
+
+function isFomoLocked() {
+  return fomoLockUntil !== null && Date.now() < fomoLockUntil;
+}
+
+function resetAll(force) {
+  if (isFomoLocked() && !force) return; // bloqué par le verrou anti-FOMO
+  clearInterval(fomoLockInterval); fomoLockUntil = null;
   clearInterval(timerInterval); timerState = 'idle';
   remaining = timerDuration;
   checks = {first:false,second:false,fvg:false,ifvg:false}; aplussActive = false; goldenActive = false;
@@ -1720,6 +1878,104 @@ function showTab(tab) {
 }
 
 // ═══════════════════════════════════
+//  NO TRADE TODAY (journées sans trade)
+// ═══════════════════════════════════
+let noTradeDays = JSON.parse(localStorage.getItem('no-trade-days') || '[]');
+let selectedNoTradeReason = null;
+
+function openNoTradeModal() {
+  selectedNoTradeReason = null;
+  document.querySelectorAll('.notrade-reason-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('notrade-note').value = '';
+  document.getElementById('notrade-overlay').classList.add('visible');
+}
+function closeNoTradeModal() {
+  document.getElementById('notrade-overlay').classList.remove('visible');
+}
+function selectNoTradeReason(reason) {
+  selectedNoTradeReason = reason;
+  document.querySelectorAll('.notrade-reason-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent === reason);
+  });
+}
+function saveNoTradeDay() {
+  if (!selectedNoTradeReason) { alert('Choisis une raison.'); return; }
+  const today = new Date().toISOString().slice(0,10);
+  const note = document.getElementById('notrade-note').value;
+  noTradeDays = noTradeDays.filter(d => d.date !== today); // un seul tag par jour
+  noTradeDays.push({ date: today, reason: selectedNoTradeReason, note, mode: currentMode });
+  localStorage.setItem('no-trade-days', JSON.stringify(noTradeDays));
+  closeNoTradeModal();
+}
+
+// ═══════════════════════════════════
+//  EMOTIONAL CHECKLIST (réel uniquement)
+// ═══════════════════════════════════
+let emoAnswers = { calm: null, revenge: null, plan: null };
+
+function goToPosition() {
+  if (currentMode === 'backtest') {
+    showTab('position'); // pas de check émotionnel en backtest
+    return;
+  }
+  emoAnswers = { calm: null, revenge: null, plan: null };
+  document.querySelectorAll('.emo-q').forEach(q => q.classList.remove('answered-ok','answered-warn'));
+  document.querySelectorAll('.emo-btn').forEach(b => b.classList.remove('selected-ok','selected-warn'));
+  document.getElementById('emo-warning').style.display = 'none';
+  document.getElementById('emo-continue-btn').disabled = true;
+  document.getElementById('emo-overlay').classList.add('visible');
+}
+
+function closeEmoModal() {
+  document.getElementById('emo-overlay').classList.remove('visible');
+}
+
+function setEmoAnswer(key, isGood) {
+  emoAnswers[key] = isGood;
+  const qDiv = document.querySelector(`.emo-q[data-q="${key}"]`);
+  qDiv.classList.toggle('answered-ok', isGood);
+  qDiv.classList.toggle('answered-warn', !isGood);
+  qDiv.querySelectorAll('.emo-btn').forEach((btn, i) => {
+    // First button = "good" answer, second = "bad" answer (per markup order)
+    const btnIsGoodChoice = i === 0;
+    btn.classList.remove('selected-ok','selected-warn');
+    if ((btnIsGoodChoice && isGood) || (!btnIsGoodChoice && !isGood)) {
+      btn.classList.add(isGood ? 'selected-ok' : 'selected-warn');
+    }
+  });
+  evaluateEmoChecklist();
+}
+
+function evaluateEmoChecklist() {
+  const allAnswered = Object.values(emoAnswers).every(v => v !== null);
+  const warning = document.getElementById('emo-warning');
+  const continueBtn = document.getElementById('emo-continue-btn');
+  if (!allAnswered) { warning.style.display = 'none'; continueBtn.disabled = true; return; }
+
+  const issues = [];
+  if (!emoAnswers.calm) issues.push("tu n'es pas dans un état calme");
+  if (emoAnswers.revenge) issues.push("tu as déjà perdu un trade aujourd'hui (risque de revenge trading)");
+  if (!emoAnswers.plan) issues.push("ce trade dévie de ton plan");
+
+  if (issues.length > 0) {
+    warning.style.display = '';
+    warning.innerHTML = '⚠️ Attention : ' + issues.join(', ') + '. Es-tu sûr de vouloir continuer ?';
+  } else {
+    warning.style.display = '';
+    warning.style.background = 'rgba(16,185,129,0.1)';
+    warning.style.borderColor = 'rgba(16,185,129,0.3)';
+    warning.style.color = '#10b981';
+    warning.textContent = '✓ Tout est aligné — bon trade !';
+  }
+  continueBtn.disabled = false;
+}
+
+function confirmEmoAndContinue() {
+  document.getElementById('emo-overlay').classList.remove('visible');
+  showTab('position');
+}
+
+// ═══════════════════════════════════
 //  FORM
 // ═══════════════════════════════════
 let slPips = null;
@@ -1873,7 +2129,7 @@ function submitTrade() {
   document.getElementById('duration-display').style.color = '#334155';
   document.querySelectorAll('.sl-pip-btn').forEach(b => b.classList.remove('active'));
   slPips = null;
-  calcRR(); setDirection('LONG'); setResult('WIN'); resetAll();
+  calcRR(); setDirection('LONG'); setResult('WIN'); resetAll(true);
   updateTabBadge(); refreshStats(); updateDailyCounter();
 }
 
@@ -2052,6 +2308,9 @@ function refreshStats() {
   renderPerformanceEur(data);
   renderEquityCurve(data);
   renderWinrateEvolution(data);
+  renderStreakTracker(data);
+  renderHeatmap(data);
+  renderBtVsReal();
 }
 
 // ═══════════════════════════════════
@@ -2193,6 +2452,240 @@ function renderWinrateEvolution(data) {
       <div class="bar-track"><div class="bar-fill" style="width:${wr}%;background:${color};"></div></div>
     </div>`;
   }).join('');
+}
+
+// ═══════════════════════════════════
+//  STREAK TRACKER
+// ═══════════════════════════════════
+function renderStreakTracker(data) {
+  const sorted = [...data]
+    .filter(t => t.date && t.result !== 'BE')
+    .sort((a,b) => (a.date+' '+(a.time||'')).localeCompare(b.date+' '+(b.time||'')));
+
+  if (sorted.length === 0) {
+    document.getElementById('streak-value').textContent = '—';
+    document.getElementById('streak-label').textContent = 'trades';
+    document.getElementById('streak-best').textContent = '—';
+    document.getElementById('streak-worst').textContent = '—';
+    document.getElementById('streak-warning').style.display = 'none';
+    return;
+  }
+
+  // Current streak (from the end)
+  let currentStreak = 1;
+  const lastResult = sorted[sorted.length-1].result;
+  for (let i = sorted.length-2; i >= 0; i--) {
+    if (sorted[i].result === lastResult) currentStreak++;
+    else break;
+  }
+
+  // Best win streak / worst loss streak
+  let bestWin = 0, worstLoss = 0, curWin = 0, curLoss = 0;
+  sorted.forEach(t => {
+    if (t.result === 'WIN') { curWin++; curLoss = 0; bestWin = Math.max(bestWin, curWin); }
+    else { curLoss++; curWin = 0; worstLoss = Math.max(worstLoss, curLoss); }
+  });
+
+  const valEl = document.getElementById('streak-value');
+  const labelEl = document.getElementById('streak-label');
+  valEl.textContent = currentStreak;
+  if (lastResult === 'WIN') {
+    valEl.style.color = '#10b981';
+    labelEl.textContent = currentStreak > 1 ? 'wins consécutifs' : 'win';
+  } else {
+    valEl.style.color = '#f43f5e';
+    labelEl.textContent = currentStreak > 1 ? 'losses consécutives' : 'loss';
+  }
+  document.getElementById('streak-best').textContent = bestWin;
+  document.getElementById('streak-worst').textContent = worstLoss;
+
+  const warning = document.getElementById('streak-warning');
+  if (lastResult === 'LOSS' && currentStreak >= 2) {
+    warning.style.display = '';
+    warning.textContent = `⚠️ ${currentStreak} pertes consécutives — sois vigilant, c'est le moment où la discipline craque le plus souvent.`;
+  } else {
+    warning.style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════
+//  HEATMAP HEURE × JOUR
+// ═══════════════════════════════════
+const WEEKDAYS_FR = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+
+function renderHeatmap(data) {
+  const container = document.getElementById('heatmap-container');
+  const empty = document.getElementById('heatmap-empty');
+  const withTime = data.filter(t => t.date && t.time && t.result !== undefined);
+
+  if (withTime.length < 5) {
+    container.innerHTML = ''; empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Group by weekday (0=Mon..6=Sun) and hour bucket (e.g. 7,8,9,10,14,15,16)
+  const cells = {}; // key "day-hour" -> {wins, total}
+  const hoursUsed = new Set();
+  withTime.forEach(t => {
+    const d = new Date(t.date + 'T00:00:00');
+    const day = (d.getDay() + 6) % 7; // Mon=0
+    const hour = parseInt(t.time.split(':')[0]);
+    hoursUsed.add(hour);
+    const key = day + '-' + hour;
+    if (!cells[key]) cells[key] = { wins:0, total:0 };
+    cells[key].total++;
+    if (t.result === 'WIN') cells[key].wins++;
+  });
+
+  const hours = [...hoursUsed].sort((a,b)=>a-b);
+
+  let html = '<table style="border-collapse:collapse;font-size:11px;"><tr><td></td>';
+  hours.forEach(h => html += `<td style="padding:4px 8px;text-align:center;color:#475569;font-weight:600;">${fmt2(h)}h</td>`);
+  html += '</tr>';
+
+  for (let day = 0; day < 7; day++) {
+    const hasAny = hours.some(h => cells[day+'-'+h]);
+    if (!hasAny) continue;
+    html += `<tr><td style="padding:4px 8px;color:#94a3b8;font-weight:600;">${WEEKDAYS_FR[day]}</td>`;
+    hours.forEach(h => {
+      const c = cells[day+'-'+h];
+      if (!c) { html += '<td style="padding:4px 8px;"></td>'; return; }
+      const wr = (c.wins / c.total) * 100;
+      const color = wr >= 60 ? '16,185,129' : wr >= 40 ? '245,158,11' : '244,63,94';
+      const opacity = 0.15 + (Math.min(c.total,5)/5) * 0.35;
+      html += `<td style="padding:6px 10px;text-align:center;border-radius:6px;background:rgba(${color},${opacity.toFixed(2)});color:#e2e8f0;font-weight:700;" title="${c.total} trade${c.total>1?'s':''}">${wr.toFixed(0)}%</td>`;
+    });
+    html += '</tr>';
+  }
+  html += '</table>';
+  container.innerHTML = html;
+}
+
+// ═══════════════════════════════════
+//  EXPORT PDF MENSUEL
+// ═══════════════════════════════════
+function exportMonthlyReport() {
+  let data = trades;
+  if (statsFilter === 'backtest') data = trades.filter(t => t.mode === 'backtest');
+  if (statsFilter === 'real')     data = trades.filter(t => t.mode === 'real');
+
+  const monthTrades = data.filter(t => {
+    if (!t.date) return false;
+    const [y,m] = t.date.split('-').map(Number);
+    return y === calYear && (m-1) === calMonth;
+  }).sort((a,b) => (a.date+' '+(a.time||'')).localeCompare(b.date+' '+(b.time||'')));
+
+  const total = monthTrades.length;
+  const wins = monthTrades.filter(t=>t.result==='WIN').length;
+  const losses = monthTrades.filter(t=>t.result==='LOSS').length;
+  const be = monthTrades.filter(t=>t.result==='BE').length;
+  const winrate = total > 0 ? (wins/total*100).toFixed(1) : '0';
+  const avgRR = total > 0 ? (monthTrades.reduce((a,t)=>a+(parseFloat(t.rr)||0),0)/total).toFixed(2) : '—';
+  const withRisk = monthTrades.filter(t => tradePnl(t) !== null);
+  const pnlTotal = withRisk.reduce((a,t)=>a+tradePnl(t),0);
+  const aplusCount = monthTrades.filter(t=>t.aplus).length;
+  const goldenCount = monthTrades.filter(t=>t.golden).length;
+
+  const rows = monthTrades.map(t => {
+    const rc = t.result==='WIN'?'#10b981':t.result==='LOSS'?'#f43f5e':'#f59e0b';
+    return `<tr>
+      <td>${t.date}</td><td>${t.time||''}</td><td>${t.mode==='real'?'Réel':'Backtest'}</td>
+      <td>${t.direction||''}</td><td style="color:${rc};font-weight:700;">${t.result}</td>
+      <td>${t.rr?t.rr+'R':''}</td><td>${t.slPips?t.slPips+'p':''}</td>
+      <td>${t.aplus?'⭐':''}${t.golden?'⚡':''}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<title>Rapport ${MONTHS_FR[calMonth]} ${calYear}</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #1a202c; max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .sub { color: #64748b; font-size: 13px; margin-bottom: 28px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; }
+  .label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .value { font-size: 22px; font-weight: 800; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+  th { text-align: left; padding: 8px; border-bottom: 2px solid #1a202c; font-size: 11px; text-transform: uppercase; color: #64748b; }
+  td { padding: 8px; border-bottom: 1px solid #e2e8f0; }
+  .footer { margin-top: 30px; font-size: 11px; color: #94a3b8; text-align: center; }
+  @media print { body { padding: 20px; } }
+</style></head><body>
+  <h1>📊 Rapport de trading — ${MONTHS_FR[calMonth]} ${calYear}</h1>
+  <div class="sub">EURUSD · Liquidity Journal — ${total} trade${total>1?'s':''} (filtre : ${statsFilter==='all'?'tous':statsFilter})</div>
+  <div class="grid">
+    <div class="card"><div class="label">Win Rate</div><div class="value" style="color:#0891b2;">${winrate}%</div></div>
+    <div class="card"><div class="label">RR Moyen</div><div class="value" style="color:#2563eb;">${avgRR}${avgRR!=='—'?'R':''}</div></div>
+    <div class="card"><div class="label">Résultat</div><div class="value" style="color:${pnlTotal>=0?'#059669':'#dc2626'};">${withRisk.length>0 ? (pnlTotal>=0?'+':'')+pnlTotal.toFixed(0)+'€' : '—'}</div></div>
+    <div class="card"><div class="label">W / L / BE</div><div class="value" style="font-size:16px;">${wins} / ${losses} / ${be}</div></div>
+  </div>
+  <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="card"><div class="label">Setups A++</div><div class="value" style="color:#7c3aed;font-size:18px;">${aplusCount}</div></div>
+    <div class="card"><div class="label">Golden Setups</div><div class="value" style="color:#d97706;font-size:18px;">${goldenCount}</div></div>
+  </div>
+  <table>
+    <thead><tr><th>Date</th><th>Heure</th><th>Mode</th><th>Sens</th><th>Résultat</th><th>RR</th><th>SL</th><th>Tags</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="8" style="text-align:center;color:#94a3b8;">Aucun trade ce mois-ci</td></tr>'}</tbody>
+  </table>
+  <div class="footer">Généré le ${new Date().toLocaleDateString('fr-FR')} — EURUSD Liquidity Journal</div>
+</body></html>`;
+
+  const win = window.open('', '_blank');
+  if (!win) {
+    alert('⚠️ Le navigateur a bloqué l\'ouverture de la fenêtre d\'export.\n\nAutorise les pop-ups pour ce site (icône dans la barre d\'adresse) puis réessaie.');
+    return;
+  }
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => win.print(), 300);
+}
+
+// ═══════════════════════════════════
+//  BACKTEST VS RÉEL
+// ═══════════════════════════════════
+function renderBtVsReal() {
+  const container = document.getElementById('bt-vs-real');
+  const empty = document.getElementById('bt-vs-real-empty');
+  const bt = trades.filter(t => t.mode === 'backtest');
+  const real = trades.filter(t => t.mode === 'real');
+
+  if (bt.length === 0 || real.length === 0) {
+    container.innerHTML = ''; empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  function metrics(arr) {
+    const total = arr.length;
+    const wins = arr.filter(t=>t.result==='WIN').length;
+    const winrate = total>0 ? (wins/total*100) : 0;
+    const avgRR = total>0 ? arr.reduce((a,t)=>a+(parseFloat(t.rr)||0),0)/total : 0;
+    return { total, winrate, avgRR };
+  }
+  const mBt = metrics(bt), mReal = metrics(real);
+  const diff = mReal.winrate - mBt.winrate;
+  const diffColor = Math.abs(diff) <= 10 ? '#10b981' : Math.abs(diff) <= 20 ? '#f59e0b' : '#f43f5e';
+
+  container.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="stat-card" style="border-color:rgba(139,92,246,0.2);">
+        <div class="stat-label" style="color:#8b5cf6;">🔬 Backtest (${mBt.total})</div>
+        <div class="stat-value" style="color:#8b5cf6;font-size:24px;">${mBt.winrate.toFixed(1)}%</div>
+        <div style="font-size:11px;color:#475569;margin-top:4px;">RR moyen : ${mBt.avgRR.toFixed(2)}</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(245,158,11,0.2);">
+        <div class="stat-label" style="color:#f59e0b;">🔴 Réel (${mReal.total})</div>
+        <div class="stat-value" style="color:#f59e0b;font-size:24px;">${mReal.winrate.toFixed(1)}%</div>
+        <div style="font-size:11px;color:#475569;margin-top:4px;">RR moyen : ${mReal.avgRR.toFixed(2)}</div>
+      </div>
+    </div>
+    <div style="padding:12px 14px;border-radius:8px;background:${diffColor}11;border:1px solid ${diffColor}33;font-size:12px;color:${diffColor};font-weight:600;">
+      ${diff >= 0 ? '✓' : '⚠️'} Écart de ${Math.abs(diff).toFixed(1)} points entre réel et backtest ${diff >= 0 ? '(le réel performe aussi bien ou mieux)' : '(le réel sous-performe le backtest — vérifie ton exécution)'}
+    </div>
+  `;
 }
 
 // ═══════════════════════════════════
