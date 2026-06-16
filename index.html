@@ -2185,7 +2185,9 @@ function submitTrade() {
     slPips: slPips,
     fvgSize: fvgSize,
     riskPercent: currentRisk,
-    riskEur: lotSl ? +((parseFloat(document.getElementById('lot-capital').value)||10000) * (currentRisk/100)).toFixed(2) : null,
+    riskEur: (lotSl || slPips)
+      ? +((parseFloat(document.getElementById('lot-capital').value)||10000) * (currentRisk/100)).toFixed(2)
+      : null,
     screenshot: document.getElementById('f-screenshot').value,
     notes: document.getElementById('f-notes').value,
     aplus: aplussActive,
