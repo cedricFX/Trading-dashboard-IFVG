@@ -393,6 +393,7 @@
         <div class="sess-name">🇬🇧 Session Londres</div>
         <div class="sess-time" id="sess-london-time">--:--</div>
         <div class="sess-sub" id="sess-london-sub">07:00 → 11:00</div>
+        <div style="font-size:9px;color:#334155;margin-top:2px;" title="Le créateur de la stratégie recommande 08h00-11h00 — la fenêtre 07h-08h est une marge d'observation">📖 stratégie : 08h-11h</div>
       </div>
       <div class="sess-card" id="sess-ny">
         <div class="sess-name">🗽 Session New York</div>
@@ -414,11 +415,29 @@
       </button>
     </div>
 
-    <!-- NO TRADE TODAY tag -->
-    <div style="margin-bottom:18px;">
+    <!-- NO TRADE TODAY tag + STRATEGY TIPS -->
+    <div style="margin-bottom:18px;display:flex;gap:10px;flex-wrap:wrap;">
       <button onclick="openNoTradeModal()" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(100,116,139,0.3);background:rgba(100,116,139,0.06);color:#94a3b8;font-size:12px;font-weight:600;cursor:pointer;">
         📋 Pas de trade aujourd'hui — noter pourquoi
       </button>
+      <button onclick="toggleStrategyTips()" id="tips-toggle-btn" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(167,139,250,0.3);background:rgba(167,139,250,0.06);color:#a78bfa;font-size:12px;font-weight:600;cursor:pointer;">
+        💡 Astuces de la stratégie
+      </button>
+    </div>
+
+    <!-- STRATEGY TIPS PANEL (collapsed by default) -->
+    <div id="strategy-tips-panel" style="display:none;margin-bottom:18px;padding:18px 20px;border-radius:12px;border:1px solid rgba(167,139,250,0.2);background:rgba(167,139,250,0.04);">
+      <div style="font-size:12px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">📖 Rappels du créateur de la stratégie</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:12px;color:#94a3b8;line-height:1.5;">
+        <div>🕐 <strong style="color:#cbd5e1;">Timeframe :</strong> toujours rester sur du 15 minutes pour repérer les liquidités et le FVG.</div>
+        <div>🌊 <strong style="color:#cbd5e1;">Liquidité asiatique :</strong> si elle n'a pas été récupérée, on ne prend pas de liquidité de structure interne (peut arriver sur Londres).</div>
+        <div>🍽️ <strong style="color:#cbd5e1;">Lunch time (12h-14h) :</strong> reste attentif aux structures qui s'y forment, souvent de belles opportunités pour la suite.</div>
+        <div>📏 <strong style="color:#cbd5e1;">Choix du FVG :</strong> privilégie toujours celui qui offre le meilleur prix d'entrée. Un FVG dans la plage mais entouré de petites bougies (paraît énorme par rapport au contexte) est à éviter.</div>
+        <div>🛡️ <strong style="color:#cbd5e1;">Placement du SL :</strong> sous/au-dessus du FVG inversé ET sous/au-dessus de la bougie qui l'a inversé.</div>
+        <div>⏱️ <strong style="color:#cbd5e1;">Avant d'entrer :</strong> attends une réaction d'environ 1 min au retest du FVG inversé, dans ton sens, pour éviter une bougie impulsive qui toucherait ton SL.</div>
+        <div>🪞 <strong style="color:#cbd5e1;">Corrélation DXY :</strong> observe son comportement en miroir — il doit lui aussi créer un FVG qu'il inverse et reteste.</div>
+        <div>📐 <strong style="color:#cbd5e1;">Bonus Fibonacci :</strong> trace un fibo sur l'impulsion de liquidité et regarde le niveau 0.5 — IFVG en zone discount (sous 0.5) pour un achat, en zone premium (au-dessus) pour une vente. Sinon, la probabilité baisse légèrement.</div>
+      </div>
     </div>
 
     <!-- NO TRADE MODAL -->
@@ -514,6 +533,7 @@
           <div class="check-text">
             <div style="margin-bottom:3px;"><span class="check-num" id="num-fvg">03</span><span class="check-label" id="lbl-fvg">FVG validé</span></div>
             <div class="check-desc">FVG entre 1.3 et 6 pips, formé sur plusieurs bougies</div>
+            <div style="font-size:10px;color:#475569;margin-top:3px;">💡 Favorise le FVG qui offre le meilleur prix d'entrée — évite ceux qui paraissent énormes par rapport au contexte</div>
           </div>
           <div id="fvg-size-badge" style="display:none;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800;white-space:nowrap;"></div>
           <div class="lock-icon" id="lock-fvg">🔒</div>
@@ -579,6 +599,7 @@
             <div class="aplus-text" id="aplus-text">IFVG confluent DXY + EURUSD</div>
             <div class="aplus-badge">Setup A++</div>
           </div>
+          <div style="font-size:10px;color:#475569;margin-top:8px;padding-left:2px;">📐 Bonus qualité : fibo sur l'impulsion de liquidité → IFVG sous le niveau 0.5 pour un achat (zone discount), au-dessus pour une vente (zone premium)</div>
         </div>
       </div>
 
@@ -589,6 +610,9 @@
           <div class="check-text">
             <div style="margin-bottom:3px;"><span class="check-num" id="num-ifvg">04</span><span class="check-label" id="lbl-ifvg">Retest de l'IFVG confirmé</span></div>
             <div class="check-desc">Le prix reteste l'IFVG — entrée en position</div>
+            <div style="font-size:10px;color:#475569;margin-top:3px;line-height:1.5;">
+              💡 SL sous/au-dessus du FVG inversé ET de la bougie qui l'a inversé · attends ~1 min de réaction dans ton sens avant d'entrer · vérifie que le DXY est en miroir (FVG + retest symétrique)
+            </div>
           </div>
           <div class="lock-icon" id="lock-ifvg">🔒</div>
         </div>
@@ -1004,6 +1028,9 @@ async function fetchTradesFromSheet() {
       // Merge: Sheet is source of truth once reachable
       trades = data.trades.map(t => ({
         ...t,
+        date: normalizeDate(t.date),
+        time: normalizeTime(t.time),
+        timeEnd: normalizeTime(t.timeEnd),
         aplus: t.aplus === true || t.aplus === 'TRUE' || t.aplus === 'true',
         golden: t.golden === true || t.golden === 'TRUE' || t.golden === 'true',
       }));
@@ -1015,6 +1042,26 @@ async function fetchTradesFromSheet() {
   } catch (err) {
     updateSyncBadge('error');
   }
+}
+
+// Google Sheets renvoie parfois les dates/heures en ISO complet (2026-06-15T00:00:00.000Z)
+// au lieu du simple YYYY-MM-DD ou HH:MM attendu par le dashboard — on normalise ici.
+function normalizeDate(val) {
+  if (!val) return val;
+  const s = String(val);
+  const match = s.match(/^(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : s;
+}
+function normalizeTime(val) {
+  if (!val) return val;
+  const s = String(val);
+  // ISO datetime → extract HH:MM
+  const isoMatch = s.match(/T(\d{2}):(\d{2})/);
+  if (isoMatch) return isoMatch[1] + ':' + isoMatch[2];
+  // Already HH:MM or HH:MM:SS → keep first 5 chars
+  const hmMatch = s.match(/^(\d{2}):(\d{2})/);
+  if (hmMatch) return hmMatch[1] + ':' + hmMatch[2];
+  return s;
 }
 
 async function pushTradeToSheet(trade) {
@@ -1911,24 +1958,16 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ═══════════════════════════════════
-//  TABS
-// ═══════════════════════════════════
-function showTab(tab) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + tab).classList.add('active');
-  ['checklist','position','stats','journal'].forEach((t,i) => {
-    if (t === tab) document.querySelectorAll('.tab-btn')[i].classList.add('active');
-  });
-  if (tab === 'stats') { refreshStats(); renderCalendar(); }
-  if (tab === 'journal') refreshJournal();
-}
-
-// ═══════════════════════════════════
 //  NO TRADE TODAY (journées sans trade)
 // ═══════════════════════════════════
 let noTradeDays = JSON.parse(localStorage.getItem('no-trade-days') || '[]');
 let selectedNoTradeReason = null;
+
+function toggleStrategyTips() {
+  const panel = document.getElementById('strategy-tips-panel');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : '';
+}
 
 function openNoTradeModal() {
   selectedNoTradeReason = null;
@@ -2206,7 +2245,9 @@ function renderCalendar() {
   const dayMap = {};
   data.forEach(t => {
     if (!t.date) return;
-    const [y,m,d] = t.date.split('-').map(Number);
+    const parts = String(t.date).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!parts) return;
+    const y = parseInt(parts[1]), m = parseInt(parts[2]), d = parseInt(parts[3]);
     if (y === calYear && m-1 === calMonth) {
       if (!dayMap[d]) dayMap[d] = [];
       dayMap[d].push(t);
@@ -2255,7 +2296,9 @@ function selectCalDay(d) {
   if (statsFilter === 'real')     data = trades.filter(t => t.mode==='real');
   const dayTrades = data.filter(t => {
     if (!t.date) return false;
-    const [y,m,day] = t.date.split('-').map(Number);
+    const parts = String(t.date).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!parts) return false;
+    const y = parseInt(parts[1]), m = parseInt(parts[2]), day = parseInt(parts[3]);
     return y===calYear && m-1===calMonth && day===d;
   });
   if (dayTrades.length === 0 && selectedCalDay === d) {
