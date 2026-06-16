@@ -216,6 +216,25 @@
     .sl-pip-btn:hover { border-color:#334155; color:#94a3b8; }
     .sl-pip-btn.active { border-color:#f43f5e; background:rgba(244,63,94,0.12); color:#f43f5e; }
 
+    /* CALENDAR */
+    .cal-weekdays { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px; }
+    .cal-weekdays div { font-size:10px; font-weight:600; color:#475569; text-align:center; text-transform:uppercase; letter-spacing:0.05em; padding:4px 0; }
+    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+    .cal-day { aspect-ratio:1; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s; border:1px solid transparent; position:relative; }
+    .cal-day:hover { border-color:rgba(255,255,255,0.15); }
+    .cal-day.empty { cursor:default; }
+    .cal-day.today { border-color:rgba(6,182,212,0.5); }
+    .cal-day.win  { background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.3); }
+    .cal-day.loss { background:rgba(244,63,94,0.12); border-color:rgba(244,63,94,0.25); }
+    .cal-day.mixed { background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.25); }
+    .cal-day.be   { background:rgba(100,116,139,0.1); border-color:rgba(100,116,139,0.2); }
+    .cal-day .cal-num { font-size:12px; font-weight:700; color:#94a3b8; }
+    .cal-day.win .cal-num  { color:#10b981; }
+    .cal-day.loss .cal-num { color:#f43f5e; }
+    .cal-day.mixed .cal-num { color:#f59e0b; }
+    .cal-day .cal-dot { font-size:8px; margin-top:2px; }
+    .cal-day.selected { box-shadow:0 0 0 2px #06b6d4; }
+
     /* EMPTY */
     .empty { text-align:center; padding:60px 0; color:#334155; font-size:14px; }
     .empty-icon { font-size:40px; margin-bottom:12px; }
@@ -382,13 +401,18 @@
             <div id="timer-display" style="color:#10b981;">25:00</div>
             <div class="timer-sub">avant invalidation</div>
           </div>
+          <div id="golden-badge-first" style="display:none;padding:4px 10px;border-radius:20px;background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(245,158,11,0.15));border:1px solid rgba(251,191,36,0.5);font-size:11px;font-weight:800;color:#fbbf24;letter-spacing:0.05em;white-space:nowrap;">⚡ GOLDEN</div>
           <div id="expired-label" style="display:none;font-size:13px;font-weight:700;color:#f43f5e;">Expiré</div>
         </div>
         <div class="dxy-panel" id="first-panel">
+          <!-- Backtest date picker -->
+          <div id="bt-date-wrap" style="display:none;">
+            <div class="field-label">📅 Date du backtest</div>
+            <input type="date" id="bt-date" class="input" style="width:160px;" oninput="onBtDateChange()" />
+          </div>
           <div>
             <div class="field-label" id="first-panel-label">Heure du sweep DXY</div>
             <input type="time" id="first-time" class="input" style="width:130px;" oninput="onFirstTimeChange()" />
-            <!-- Backtest manual override note -->
             <div id="bt-note" style="display:none;font-size:11px;color:#8b5cf6;margin-top:6px;">🔬 Backtest — toute heure acceptée</div>
           </div>
           <div class="timer-progress" id="progress-wrap" style="display:none;">
@@ -417,9 +441,10 @@
         <div id="second-panel" style="display:none;padding:12px 24px 16px;border-top:1px solid rgba(6,182,212,0.08);background:rgba(6,182,212,0.02);" onclick="event.stopPropagation()">
           <div class="field-label" id="second-panel-label">Heure de la prise de liquidité EURUSD</div>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-            <input type="time" id="second-time" class="input" style="width:130px;" oninput="checkGolden()" />
-            <div id="golden-hint" style="font-size:12px;color:#475569;">Entre 08:00 et 08:59 → ⚡ Golden Setup</div>
+            <input type="time" id="second-time" class="input" style="width:130px;" oninput="checkGolden(); checkBtWindow();" />
+            <div id="golden-hint" style="font-size:12px;color:#475569;">Entre 08:00 et 08:30 → ⚡ Golden Setup</div>
           </div>
+          <div id="bt-window-hint" style="display:none;font-size:11px;margin-top:6px;"></div>
         </div>
       </div>
 
@@ -581,6 +606,30 @@
         <div class="bar-row"><div class="bar-header"><span style="font-size:12px;color:#94a3b8;">LOSS</span><span style="font-size:12px;font-weight:700;color:#f43f5e;" id="b-losses">0</span></div><div class="bar-track"><div class="bar-fill" id="bf-losses" style="width:0%;background:#f43f5e;"></div></div></div>
         <div class="bar-row"><div class="bar-header"><span style="font-size:12px;color:#94a3b8;">BE</span><span style="font-size:12px;font-weight:700;color:#f59e0b;" id="b-be">0</span></div><div class="bar-track"><div class="bar-fill" id="bf-be" style="width:0%;background:#f59e0b;"></div></div></div>
       </div>
+
+      <!-- CALENDRIER -->
+      <div class="chart-box" style="margin-top:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div class="chart-title" style="margin-bottom:0;">Calendrier des trades</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button onclick="calPrev()" style="width:28px;height:28px;border-radius:6px;border:1px solid #1e293b;background:transparent;color:#94a3b8;cursor:pointer;font-size:14px;">‹</button>
+            <span id="cal-month-label" style="font-size:13px;font-weight:700;color:#e2e8f0;min-width:120px;text-align:center;"></span>
+            <button onclick="calNext()" style="width:28px;height:28px;border-radius:6px;border:1px solid #1e293b;background:transparent;color:#94a3b8;cursor:pointer;font-size:14px;">›</button>
+          </div>
+        </div>
+        <div class="cal-weekdays">
+          <div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <!-- Day detail panel -->
+        <div id="cal-detail" style="display:none;margin-top:14px;padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;color:#e2e8f0;" id="cal-detail-title"></div>
+            <button onclick="document.getElementById('cal-detail').style.display='none'" style="background:transparent;border:none;color:#475569;cursor:pointer;font-size:16px;">×</button>
+          </div>
+          <div id="cal-detail-trades"></div>
+        </div>
+      </div>
     </div>
     <div class="empty" id="stats-empty"><div class="empty-icon">📭</div>Aucune donnée — commence par enregistrer des trades.</div>
   </div>
@@ -634,6 +683,10 @@ window.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
   document.getElementById('f-date').value = now.toISOString().slice(0,10);
   document.getElementById('f-time').value = now.toTimeString().slice(0,5);
+  // Init backtest date (starts in backtest mode)
+  document.getElementById('bt-date').value = now.toISOString().slice(0,10);
+  document.getElementById('bt-date-wrap').style.display = '';
+  document.getElementById('bt-note').style.display = '';
   setSweeper('dxy');
   startClock();
   refreshStats();
@@ -691,14 +744,21 @@ function updateGoldenHintVisibility() {
 //  MODE
 // ═══════════════════════════════════
 function setMode(mode) {
+  if (mode === currentMode) return;
   currentMode = mode;
+  // Clean slate when switching modes — avoids backtest deadline state leaking into real mode or vice versa
+  if (timerState !== 'idle') resetAll();
   document.getElementById('btn-bt').className   = 'mode-btn' + (mode === 'backtest' ? ' active-bt'   : '');
   document.getElementById('btn-real').className = 'mode-btn' + (mode === 'real'     ? ' active-real' : '');
   const toggle = document.getElementById('mode-toggle');
   toggle.style.borderColor = mode === 'backtest' ? '#8b5cf6' : '#f59e0b';
   setTimeout(() => toggle.style.borderColor = '#1e293b', 800);
-  // Show backtest note on first panel
+  // Backtest-only UI: date picker + note + relaxed timing
   document.getElementById('bt-note').style.display = mode === 'backtest' ? '' : 'none';
+  document.getElementById('bt-date-wrap').style.display = mode === 'backtest' ? '' : 'none';
+  if (mode === 'backtest' && !document.getElementById('bt-date').value) {
+    document.getElementById('bt-date').value = new Date().toISOString().slice(0, 10);
+  }
   updateClock();
   updateDailyCounter();
 }
@@ -861,7 +921,7 @@ function showTab(tab) {
   ['checklist','position','stats','journal'].forEach((t,i) => {
     if (t === tab) document.querySelectorAll('.tab-btn')[i].classList.add('active');
   });
-  if (tab === 'stats') refreshStats();
+  if (tab === 'stats') { refreshStats(); renderCalendar(); }
   if (tab === 'journal') refreshJournal();
 }
 
@@ -872,37 +932,81 @@ function timeStrToSec(str) { const [h,m] = str.split(':').map(Number); return h*
 function nowSec() { const n = new Date(); return n.getHours()*3600+n.getMinutes()*60+n.getSeconds(); }
 function fmtCountdown(sec) { return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0'); }
 
+function onBtDateChange() {
+  // Sync backtest date to the position form date
+  const val = document.getElementById('bt-date').value;
+  if (val) document.getElementById('f-date').value = val;
+}
+
 function onFirstTimeChange() {
   const val = document.getElementById('first-time').value;
   document.getElementById('btn-start').disabled = !val;
-  if (!val) return;
-  if (timerState !== 'idle') resetAll();
-  // In backtest: auto-start as soon as time is entered
-  if (currentMode === 'backtest') {
-    setTimeout(startTimer, 0);
+  if (!val) {
+    if (timerState !== 'idle') resetAll();
+    goldenActive = false; updateGolden();
+    return;
   }
+  if (currentMode === 'backtest') {
+    if (timerState !== 'idle') resetAll();
+    showBacktestDeadline(val);
+  }
+  checkGolden(); // check golden on every time change
+}
+
+function showBacktestDeadline(sweepStr) {
+  const [sh, sm] = sweepStr.split(':').map(Number);
+  const totalMin = sh * 60 + sm + Math.floor(timerDuration / 60);
+  const dh = Math.floor(totalMin / 60) % 24;
+  const dm = totalMin % 60;
+  const deadline = fmt2(dh) + ':' + fmt2(dm);
+  const mins = Math.floor(timerDuration / 60);
+
+  document.getElementById('timer-display').textContent = '→ ' + deadline;
+  document.getElementById('timer-display').style.color = '#06b6d4';
+  document.getElementById('timer-display').style.fontSize = '18px';
+  document.querySelector('.timer-sub').textContent = 'limite ' + mins + ' min (jusqu\'à ' + deadline + ')';
+  document.getElementById('timer-inline').classList.add('visible');
+
+  timerState = 'running';
+  checks.first = true;
+  document.getElementById('first-time').disabled = true;
+  document.getElementById('btn-start').style.display = 'none';
+  document.getElementById('btn-reset').style.display = '';
+  document.getElementById('progress-wrap').style.display = 'none';
+  updateCheckUI('first');
+
+  document.getElementById('timer-badge-text').textContent = '→ ' + deadline;
+  document.getElementById('timer-badge-text').style.color = '#06b6d4';
+  document.getElementById('badge-dot').style.background = '#06b6d4';
+  document.getElementById('badge-dot').style.boxShadow = '0 0 6px #06b6d4';
+  document.getElementById('timer-badge').style.borderColor = '#06b6d455';
+  document.getElementById('timer-badge').style.background = '#06b6d411';
+  document.getElementById('timer-badge').style.display = 'flex';
+
+  // Store deadline in minutes for validation of second sweep
+  document.getElementById('first-time').dataset.deadlineMin = totalMin;
 }
 
 function startTimer() {
   const sweepStr = document.getElementById('first-time').value;
   if (!sweepStr) return;
 
-  // In real mode, validate killzone (07:00–11:00 or 14:00–17:00)
-  if (currentMode === 'real') {
-    const [sh, sm] = sweepStr.split(':').map(Number);
-    const sweepMin = sh * 60 + sm;
-    const inLondon = sweepMin >= 7*60 && sweepMin < 11*60;
-    const inNY     = sweepMin >= 14*60 && sweepMin < 17*60;
-    if (!inLondon && !inNY) {
-      alert('⛔ En mode Réel, le sweep doit être dans une killzone (07h–11h ou 14h–17h).');
-      return;
-    }
+  if (currentMode === 'backtest') {
+    showBacktestDeadline(sweepStr);
+    return;
   }
 
-  // In backtest: compute elapsed from entered sweep time vs now
-  // but allow any hour — just start the countdown from the entered time
-  const sweepSec = timeStrToSec(sweepStr);
-  const elapsed = currentMode === 'backtest' ? 0 : (nowSec() - sweepSec);
+  // REAL MODE : validate killzone
+  const [sh, sm] = sweepStr.split(':').map(Number);
+  const sweepMin = sh * 60 + sm;
+  const inLondon = sweepMin >= 7*60 && sweepMin < 11*60;
+  const inNY     = sweepMin >= 14*60 && sweepMin < 17*60;
+  if (!inLondon && !inNY) {
+    alert('⛔ En mode Réel, le sweep doit être dans une killzone (07h–11h ou 14h–17h).');
+    return;
+  }
+
+  const elapsed = nowSec() - timeStrToSec(sweepStr);
   const left = timerDuration - elapsed;
   if (left <= 0) { expireTimer(); return; }
   remaining = Math.floor(left);
@@ -913,6 +1017,8 @@ function startTimer() {
   document.getElementById('btn-reset').style.display = '';
   document.getElementById('progress-wrap').style.display = '';
   document.getElementById('timer-inline').classList.add('visible');
+  document.getElementById('timer-display').style.fontSize = '24px';
+  document.querySelector('.timer-sub').textContent = 'avant invalidation';
   updateCheckUI('first');
   timerInterval = setInterval(timerTick, 1000);
   timerTick();
@@ -977,8 +1083,10 @@ function resetAll() {
   document.getElementById('progress-wrap').style.display = 'none';
   document.getElementById('expired-msg').style.display = 'none';
   document.getElementById('first-panel').classList.remove('expired-panel');
-  document.getElementById('timer-display').textContent = sweeper === 'dxy' ? '25:00' : '15:00';
+  document.getElementById('timer-display').textContent = sweeper === 'eurusd' ? '15:00' : '25:00';
   document.getElementById('timer-display').style.color = '#10b981';
+  document.getElementById('timer-display').style.fontSize = '24px';
+  document.querySelector('.timer-sub').textContent = 'avant invalidation';
   // Header badges
   document.getElementById('timer-badge').style.display = 'none';
   document.getElementById('expired-badge').style.display = 'none';
@@ -991,10 +1099,15 @@ function resetAll() {
   document.getElementById('aplus-text').classList.remove('active');
   document.getElementById('aplus-check').classList.remove('active');
   document.getElementById('golden-badge').style.display = 'none';
+  const gbf = document.getElementById('golden-badge-first');
+  if (gbf) gbf.style.display = 'none';
+  document.getElementById('item-first').classList.remove('golden');
   document.getElementById('item-second').classList.remove('golden');
-  document.getElementById('golden-hint').textContent = 'Entre 08:00 et 08:59 → ⚡ Golden Setup';
+  document.getElementById('golden-hint').textContent = 'Entre 08:00 et 08:30 → ⚡ Golden Setup';
   document.getElementById('golden-hint').style.color = '#475569';
   document.getElementById('golden-hint').style.fontWeight = '';
+  const bwh = document.getElementById('bt-window-hint');
+  if (bwh) { bwh.style.display = 'none'; bwh.textContent = ''; }
   ['second','fvg','ifvg'].forEach(k => lockItem(k));
   document.getElementById('setup-valid').classList.remove('visible');
   document.getElementById('aplus-label').classList.remove('visible');
@@ -1020,6 +1133,22 @@ const ORDER = ['first','second','fvg','ifvg'];
 function toggleCheck(key) {
   if (timerState === 'expired' || key === 'first') return;
   if (key === 'second' && timerState !== 'running') return;
+
+  // In backtest: validate that second sweep time is within the window
+  if (key === 'second' && currentMode === 'backtest' && !checks.second) {
+    const secondTime = document.getElementById('second-time').value;
+    const deadlineMin = parseInt(document.getElementById('first-time').dataset.deadlineMin || '0');
+    if (secondTime && deadlineMin) {
+      const [h, m] = secondTime.split(':').map(Number);
+      const secondMin = h * 60 + m;
+      if (secondMin > deadlineMin) {
+        // Out of window — show expired state
+        showBtWindowExpired(deadlineMin);
+        return;
+      }
+    }
+  }
+
   const idx = ORDER.indexOf(key);
   if (idx > 0 && !checks[ORDER[idx-1]]) return;
   checks[key] = !checks[key];
@@ -1034,6 +1163,35 @@ function toggleCheck(key) {
   if (!checks.fvg) { aplussActive = false; updateAplus(); }
   if (!checks.second) { goldenActive = false; updateGolden(); }
   checkAllDone();
+}
+
+function showBtWindowExpired(deadlineMin) {
+  const dh = Math.floor(deadlineMin / 60) % 24, dm = deadlineMin % 60;
+  const deadline = fmt2(dh) + ':' + fmt2(dm);
+  // Flash the timer display red
+  const td = document.getElementById('timer-display');
+  td.textContent = '⛔ ' + deadline;
+  td.style.color = '#f43f5e';
+  td.style.fontSize = '16px';
+  document.querySelector('.timer-sub').textContent = 'fenêtre dépassée !';
+  // Show expired message temporarily
+  const msg = document.getElementById('expired-msg');
+  msg.textContent = '⛔ Backtest — La prise de liquidité (condition 2) dépasse la fenêtre de ' + Math.floor(timerDuration/60) + ' min. Reset pour recommencer.';
+  msg.style.display = '';
+  // Expire state
+  timerState = 'expired';
+  checks = {first:false, second:false, fvg:false, ifvg:false};
+  aplussActive = false; goldenActive = false;
+  document.getElementById('item-first').classList.add('expired-item');
+  document.getElementById('cb-first').classList.add('expired');
+  document.getElementById('lbl-first').classList.add('expired-label');
+  document.getElementById('timer-badge').style.display = 'none';
+  document.getElementById('expired-badge').style.display = '';
+  document.getElementById('fvg-aplus-panel').style.display = 'none';
+  document.getElementById('second-panel').style.display = 'none';
+  ['second','fvg','ifvg'].forEach(k => lockItem(k));
+  document.getElementById('setup-valid').classList.remove('visible');
+  updatePositionTab();
 }
 
 function updateCheckUI(key) {
@@ -1062,27 +1220,55 @@ function updateCheckUI(key) {
 // ═══════════════════════════════════
 //  GOLDEN SETUP
 // ═══════════════════════════════════
+function checkBtWindow() {
+  if (currentMode !== 'backtest') return;
+  const hint = document.getElementById('bt-window-hint');
+  const secondTime = document.getElementById('second-time').value;
+  const deadlineMin = parseInt(document.getElementById('first-time').dataset.deadlineMin || '0');
+  if (!secondTime || !deadlineMin) { hint.style.display = 'none'; return; }
+  const [h, m] = secondTime.split(':').map(Number);
+  const secondMin = h * 60 + m;
+  const dh = Math.floor(deadlineMin/60)%24, dm = deadlineMin%60;
+  const deadline = fmt2(dh)+':'+fmt2(dm);
+  hint.style.display = '';
+  if (secondMin <= deadlineMin) {
+    hint.textContent = '✓ Dans la fenêtre (limite : ' + deadline + ')';
+    hint.style.color = '#10b981';
+  } else {
+    hint.textContent = '⛔ Hors fenêtre — limite à ' + deadline + '. Coche ignorée.';
+    hint.style.color = '#f43f5e';
+  }
+}
+
 function checkGolden() {
-  // Golden only applies when EURUSD is in second slot (DXY sweeps first)
-  if (sweeper !== 'dxy') { goldenActive = false; updateGolden(); return; }
-  const val = document.getElementById('second-time').value;
+  // Golden = premier sweep entre 08:00 et 08:30
+  // Valide pour : DXY en premier OU les deux en même temps
+  // Pas valide si EURUSD en premier uniquement
+  if (sweeper === 'eurusd') { goldenActive = false; updateGolden(); return; }
+  const val = document.getElementById('first-time').value;
   if (!val) { goldenActive = false; updateGolden(); return; }
-  goldenActive = (parseInt(val.split(':')[0]) === 8);
+  const [h, m] = val.split(':').map(Number);
+  const totalMin = h * 60 + m;
+  goldenActive = (totalMin >= 8*60 && totalMin <= 8*60+30);
   updateGolden();
 }
 
 function updateGolden() {
-  const item = document.getElementById('item-second');
-  const badge = document.getElementById('golden-badge');
-  const hint = document.getElementById('golden-hint');
-  item.classList.toggle('golden', goldenActive);
-  badge.style.display = (goldenActive && sweeper === 'dxy') ? '' : 'none';
-  if (sweeper === 'dxy') {
+  const badge = document.getElementById('golden-badge');       // on second card (hidden in eurusd-first mode)
+  const badgeFirst = document.getElementById('golden-badge-first'); // on first card
+  const hint  = document.getElementById('golden-hint');
+  const firstItem = document.getElementById('item-first');
+  firstItem.classList.toggle('golden', goldenActive);
+  // Show badge on first card
+  if (badgeFirst) badgeFirst.style.display = goldenActive ? '' : 'none';
+  badge.style.display = 'none'; // always hide old badge on second card
+  if (sweeper !== 'eurusd') {
     if (goldenActive) {
-      hint.textContent = '⚡ Golden Setup détecté !';
+      hint.textContent = '⚡ Golden Setup — sweep entre 08:00 et 08:30 !';
       hint.style.color = '#fbbf24'; hint.style.fontWeight = '700';
     } else {
-      hint.textContent = 'Entre 08:00 et 08:59 → ⚡ Golden Setup';
+      const val = document.getElementById('first-time').value;
+      hint.textContent = val ? 'Hors fenêtre Golden (08:00–08:30)' : 'Entre 08:00 et 08:30 → ⚡ Golden Setup';
       hint.style.color = '#475569'; hint.style.fontWeight = '';
     }
   }
@@ -1144,21 +1330,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ═══════════════════════════════════
-//  MODE
-// ═══════════════════════════════════
-function setMode(mode) {
-  currentMode = mode;
-  const btBtn = document.getElementById('btn-bt');
-  const realBtn = document.getElementById('btn-real');
-  btBtn.className = 'mode-btn' + (mode === 'backtest' ? ' active-bt' : '');
-  realBtn.className = 'mode-btn' + (mode === 'real' ? ' active-real' : '');
-  const toggle = document.getElementById('mode-toggle');
-  toggle.style.borderColor = mode === 'backtest' ? '#8b5cf6' : '#f59e0b';
-  setTimeout(() => toggle.style.borderColor = '#1e293b', 800);
-  updateClock(); // rafraîchit horloge + warning immédiatement
-}
-
-// ═══════════════════════════════════
 //  TABS
 // ═══════════════════════════════════
 function showTab(tab) {
@@ -1168,7 +1339,7 @@ function showTab(tab) {
   ['checklist','position','stats','journal'].forEach((t,i) => {
     if (t === tab) document.querySelectorAll('.tab-btn')[i].classList.add('active');
   });
-  if (tab === 'stats') refreshStats();
+  if (tab === 'stats') { refreshStats(); renderCalendar(); }
   if (tab === 'journal') refreshJournal();
 }
 
@@ -1258,7 +1429,9 @@ function submitTrade() {
   const trade = {
     id: Date.now(),
     mode: currentMode,
-    date: document.getElementById('f-date').value,
+    date: currentMode === 'backtest'
+      ? (document.getElementById('bt-date').value || document.getElementById('f-date').value)
+      : document.getElementById('f-date').value,
     time: document.getElementById('f-time').value,
     timeEnd: document.getElementById('f-time-end').value,
     duration: durEl.dataset.duration || '',
@@ -1301,12 +1474,123 @@ function submitTrade() {
 }
 
 // ═══════════════════════════════════
-//  STATS
+//  CALENDAR
 // ═══════════════════════════════════
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth(); // 0-based
+let selectedCalDay = null;
+
+const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth=11; calYear--; } renderCalendar(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth=0; calYear++; } renderCalendar(); }
+
+function renderCalendar() {
+  const label = document.getElementById('cal-month-label');
+  const grid  = document.getElementById('cal-grid');
+  if (!label || !grid) return;
+  label.textContent = MONTHS_FR[calMonth] + ' ' + calYear;
+
+  // Build day→trades map filtered by current statsFilter
+  let data = trades;
+  if (statsFilter === 'backtest') data = trades.filter(t => t.mode==='backtest');
+  if (statsFilter === 'real')     data = trades.filter(t => t.mode==='real');
+
+  const dayMap = {};
+  data.forEach(t => {
+    if (!t.date) return;
+    const [y,m,d] = t.date.split('-').map(Number);
+    if (y === calYear && m-1 === calMonth) {
+      if (!dayMap[d]) dayMap[d] = [];
+      dayMap[d].push(t);
+    }
+  });
+
+  // First weekday of month (Mon=0)
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const offset = (firstDay + 6) % 7; // convert Sun=0 to Mon=0
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear()===calYear && today.getMonth()===calMonth;
+
+  let html = '';
+  for (let i=0; i<offset; i++) html += '<div class="cal-day empty"></div>';
+  for (let d=1; d<=daysInMonth; d++) {
+    const ts = dayMap[d] || [];
+    const wins  = ts.filter(t=>t.result==='WIN').length;
+    const losses= ts.filter(t=>t.result==='LOSS').length;
+    const bes   = ts.filter(t=>t.result==='BE').length;
+    let cls = 'cal-day';
+    let dot = '';
+    if (ts.length > 0) {
+      if (wins > 0 && losses === 0) { cls += ' win';   dot = '●'; }
+      else if (losses > 0 && wins === 0) { cls += ' loss'; dot = '●'; }
+      else if (wins > 0 && losses > 0) { cls += ' mixed'; dot = '●'; }
+      else { cls += ' be'; dot = '●'; }
+    }
+    if (isCurrentMonth && d === today.getDate()) cls += ' today';
+    if (selectedCalDay === d) cls += ' selected';
+    const title = ts.length > 0 ? `${ts.length} trade${ts.length>1?'s':''}` : '';
+    html += `<div class="${cls}" onclick="selectCalDay(${d})" title="${title}">
+      <span class="cal-num">${d}</span>
+      ${dot ? `<span class="cal-dot">${dot}</span>` : ''}
+    </div>`;
+  }
+  grid.innerHTML = html;
+
+  // Refresh detail panel if a day is selected
+  if (selectedCalDay) showCalDetail(selectedCalDay, dayMap[selectedCalDay]||[]);
+}
+
+function selectCalDay(d) {
+  let data = trades;
+  if (statsFilter === 'backtest') data = trades.filter(t => t.mode==='backtest');
+  if (statsFilter === 'real')     data = trades.filter(t => t.mode==='real');
+  const dayTrades = data.filter(t => {
+    if (!t.date) return false;
+    const [y,m,day] = t.date.split('-').map(Number);
+    return y===calYear && m-1===calMonth && day===d;
+  });
+  if (dayTrades.length === 0 && selectedCalDay === d) {
+    selectedCalDay = null; document.getElementById('cal-detail').style.display='none';
+    renderCalendar(); return;
+  }
+  selectedCalDay = d;
+  renderCalendar();
+  showCalDetail(d, dayTrades);
+}
+
+function showCalDetail(d, dayTrades) {
+  const panel = document.getElementById('cal-detail');
+  const title = document.getElementById('cal-detail-title');
+  const list  = document.getElementById('cal-detail-trades');
+  panel.style.display = '';
+  title.textContent = `${d} ${MONTHS_FR[calMonth]} ${calYear} — ${dayTrades.length} trade${dayTrades.length>1?'s':''}`;
+  if (dayTrades.length === 0) {
+    list.innerHTML = '<div style="font-size:12px;color:#475569;">Aucun trade ce jour.</div>';
+    return;
+  }
+  list.innerHTML = dayTrades.map(t => {
+    const rc = t.result==='WIN'?'#10b981':t.result==='LOSS'?'#f43f5e':'#f59e0b';
+    const dc = t.direction==='LONG'?'#10b981':'#f43f5e';
+    const dur = t.duration ? ` · ⏱ ${Math.floor(t.duration/60)>0?Math.floor(t.duration/60)+'h'+String(t.duration%60).padStart(2,'0'):t.duration%60+'min'}` : '';
+    const sc = t.screenshot ? `<a href="${t.screenshot}" target="_blank" style="color:#06b6d4;font-size:11px;text-decoration:none;">📸 ↗</a> ` : '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <span style="padding:3px 8px;border-radius:5px;background:${rc}22;color:${rc};font-weight:800;font-size:11px;">${t.result}</span>
+      <span style="font-size:12px;color:${dc};font-weight:700;">${t.direction}</span>
+      ${t.rr?`<span style="font-size:12px;color:#06b6d4;">${t.rr}R</span>`:''}
+      ${t.slPips?`<span style="font-size:11px;color:#64748b;">SL ${t.slPips}p</span>`:''}
+      <span style="font-size:11px;color:#475569;">${t.time||''}${t.timeEnd?' → '+t.timeEnd:''}${dur}</span>
+      <span style="margin-left:auto;">${sc}</span>
+    </div>`;
+  }).join('');
+}
 function setStatsFilter(f) {
   statsFilter = f;
   ['all','backtest','real'].forEach(x => document.getElementById('sf-'+x).classList.toggle('active', x===f));
   refreshStats();
+  selectedCalDay = null;
+  renderCalendar();
 }
 
 function refreshStats() {
