@@ -2851,7 +2851,7 @@ let editDirection = 'LONG';
 let editResult = 'WIN';
 
 function openEditTrade(id) {
-  const t = trades.find(tr => tr.id === id);
+  const t = trades.find(tr => String(tr.id) === String(id));
   if (!t) return;
   editingTradeId = id;
 
@@ -2898,7 +2898,7 @@ function openEditScreenshot() {
 
 function saveEditTrade() {
   if (!editingTradeId) return;
-  const idx = trades.findIndex(t => t.id === editingTradeId);
+  const idx = trades.findIndex(t => String(t.id) === String(editingTradeId));
   if (idx === -1) return;
 
   const updated = {
@@ -3022,7 +3022,7 @@ function closeConfirm() {
 }
 function confirmDelete() {
   if (!pendingDeleteId) return;
-  trades = trades.filter(t => t.id !== pendingDeleteId);
+  trades = trades.filter(t => String(t.id) !== String(pendingDeleteId));
   localStorage.setItem('trading-trades', JSON.stringify(trades));
   deleteTradeFromSheet(pendingDeleteId); // synchro Google Sheet
   pendingDeleteId = null;
