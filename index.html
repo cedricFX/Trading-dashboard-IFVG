@@ -212,7 +212,7 @@
     .filter-btn.active { background:#1e293b; color:#e2e8f0; border-color:#334155; }
 
     /* SL PIPS BUTTONS */
-    .sl-pip-btn { width:38px; height:38px; border-radius:8px; border:1.5px solid #1e293b; background:rgba(255,255,255,0.02); color:#475569; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.15s; }
+    .sl-pip-btn { min-width:38px; height:34px; padding:0 8px; border-radius:8px; border:1.5px solid #1e293b; background:rgba(255,255,255,0.02); color:#475569; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; }
     .sl-pip-btn:hover { border-color:#334155; color:#94a3b8; }
     .sl-pip-btn.active { border-color:#f43f5e; background:rgba(244,63,94,0.12); color:#f43f5e; }
 
@@ -281,6 +281,7 @@
       <div>
         <div class="header-title">EURUSD · Liquidity Journal</div>
         <div class="header-sub">ICT / SMC · Asian Liquidity + IFVG</div>
+        <div id="sync-badge" style="display:none;font-size:10px;font-weight:700;margin-top:2px;"></div>
       </div>
 
       <!-- WORLD CLOCKS -->
@@ -518,7 +519,7 @@
       </div>
 
       <!-- Prix / SL / TP -->
-      <div class="field"><div class="field-label">Prix d'entrée</div><input type="number" step="0.00001" id="f-entry" class="input" placeholder="1.08450" oninput="calcRR()" /></div>
+      <div class="field"><div class="field-label">Prix d'entrée</div><input type="number" step="0.00001" id="f-entry" class="input" placeholder="1.08450" oninput="autoCalcSlTp()" /></div>
       <div class="field"><div class="field-label">Stop Loss (prix)</div><input type="number" step="0.00001" id="f-sl" class="input" placeholder="1.08320" oninput="calcRR()" /></div>
       <div class="field"><div class="field-label">Take Profit</div><input type="number" step="0.00001" id="f-tp" class="input" placeholder="1.08710" oninput="calcRR()" /></div>
       <div class="field"><div class="field-label">Risk/Reward (auto)</div><div class="rr-display" id="rr-display">Calculé automatiquement</div></div>
@@ -529,14 +530,20 @@
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
           <div style="display:flex;gap:8px;flex-wrap:wrap;" id="sl-pips-btns">
             <button class="sl-pip-btn" onclick="setSlPips(2)">2</button>
+            <button class="sl-pip-btn" onclick="setSlPips(2.5)">2.5</button>
             <button class="sl-pip-btn" onclick="setSlPips(3)">3</button>
+            <button class="sl-pip-btn" onclick="setSlPips(3.5)">3.5</button>
             <button class="sl-pip-btn" onclick="setSlPips(4)">4</button>
+            <button class="sl-pip-btn" onclick="setSlPips(4.5)">4.5</button>
             <button class="sl-pip-btn" onclick="setSlPips(5)">5</button>
+            <button class="sl-pip-btn" onclick="setSlPips(5.5)">5.5</button>
             <button class="sl-pip-btn" onclick="setSlPips(6)">6</button>
+            <button class="sl-pip-btn" onclick="setSlPips(6.5)">6.5</button>
             <button class="sl-pip-btn" onclick="setSlPips(7)">7</button>
+            <button class="sl-pip-btn" onclick="setSlPips(7.5)">7.5</button>
             <button class="sl-pip-btn" onclick="setSlPips(8)">8</button>
           </div>
-          <input type="number" id="f-sl-pips" class="input" style="width:90px;" min="2" max="8" step="0.1" placeholder="pips" oninput="onSlPipsInput()" />
+          <input type="number" id="f-sl-pips" class="input" style="width:90px;" min="2" max="8" step="0.5" placeholder="pips" oninput="onSlPipsInput()" />
           <div id="sl-pips-display" style="font-size:12px;color:#475569;"></div>
         </div>
       </div>
@@ -655,8 +662,68 @@
 
 <script>
 // ═══════════════════════════════════
-//  STATE
+//  GOOGLE SHEET SYNC
 // ═══════════════════════════════════
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxaGd1hkMonRb1GsJVjRkZwLgp8tuiWsuRQd67gpm0SpQn_Phqs0cBXNVGocbX2cju7/exec';
+let syncStatus = 'idle'; // idle | syncing | ok | error
+
+function updateSyncBadge(status) {
+  syncStatus = status;
+  const el = document.getElementById('sync-badge');
+  if (!el) return;
+  if (status === 'syncing') { el.textContent = '🔄 Synchro…'; el.style.color = '#06b6d4'; el.style.display=''; }
+  else if (status === 'ok') { el.textContent = '✓ Synchronisé'; el.style.color = '#10b981'; el.style.display=''; setTimeout(()=>{ if(syncStatus==='ok') el.style.display='none'; }, 2500); }
+  else if (status === 'error') { el.textContent = '⚠️ Hors ligne (local uniquement)'; el.style.color = '#f59e0b'; el.style.display=''; }
+  else { el.style.display = 'none'; }
+}
+
+async function fetchTradesFromSheet() {
+  updateSyncBadge('syncing');
+  try {
+    const res = await fetch(SHEET_URL + '?action=getAll');
+    const data = await res.json();
+    if (data.trades) {
+      // Merge: Sheet is source of truth once reachable
+      trades = data.trades.map(t => ({
+        ...t,
+        aplus: t.aplus === true || t.aplus === 'TRUE' || t.aplus === 'true',
+        golden: t.golden === true || t.golden === 'TRUE' || t.golden === 'true',
+      }));
+      localStorage.setItem('trading-trades', JSON.stringify(trades));
+      updateSyncBadge('ok');
+      refreshJournal(); refreshStats(); updateTabBadge(); updateDailyCounter();
+      if (document.getElementById('page-stats').classList.contains('active')) renderCalendar();
+    }
+  } catch (err) {
+    updateSyncBadge('error');
+  }
+}
+
+async function pushTradeToSheet(trade) {
+  updateSyncBadge('syncing');
+  try {
+    await fetch(SHEET_URL + '?action=add', {
+      method: 'POST',
+      body: JSON.stringify({ trade })
+    });
+    updateSyncBadge('ok');
+  } catch (err) {
+    updateSyncBadge('error');
+  }
+}
+
+async function deleteTradeFromSheet(id) {
+  updateSyncBadge('syncing');
+  try {
+    await fetch(SHEET_URL + '?action=delete', {
+      method: 'POST',
+      body: JSON.stringify({ id })
+    });
+    updateSyncBadge('ok');
+  } catch (err) {
+    updateSyncBadge('error');
+  }
+}
 const TIMER_DXY_FIRST    = 25 * 60; // DXY sweeps first → 25 min window for EURUSD
 const TIMER_EURUSD_FIRST = 15 * 60; // EURUSD sweeps first → 15 min window for DXY
 let sweeper = 'dxy';   // 'dxy' | 'eurusd'  — who sweeps first
@@ -692,6 +759,7 @@ window.addEventListener('DOMContentLoaded', () => {
   refreshStats();
   refreshJournal();
   updateTabBadge();
+  fetchTradesFromSheet(); // sync depuis Google Sheet au chargement
 });
 
 // ═══════════════════════════════════
@@ -1352,6 +1420,7 @@ function setDirection(d) {
   direction = d;
   document.getElementById('btn-long').className = 'toggle-btn'+(d==='LONG'?' active-long':'');
   document.getElementById('btn-short').className = 'toggle-btn'+(d==='SHORT'?' active-short':'');
+  autoCalcSlTp();
 }
 function setResult(r) {
   result = r;
@@ -1364,17 +1433,19 @@ function setSlPips(v) {
   slPips = v;
   document.getElementById('f-sl-pips').value = v;
   document.querySelectorAll('.sl-pip-btn').forEach(b => {
-    b.classList.toggle('active', parseInt(b.textContent) === v);
+    b.classList.toggle('active', parseFloat(b.textContent) === v);
   });
   updateSlPipsDisplay(v);
+  autoCalcSlTp();
 }
 function onSlPipsInput() {
   const v = parseFloat(document.getElementById('f-sl-pips').value);
   slPips = (!isNaN(v) && v >= 2 && v <= 8) ? v : null;
   document.querySelectorAll('.sl-pip-btn').forEach(b => {
-    b.classList.toggle('active', parseInt(b.textContent) === v);
+    b.classList.toggle('active', parseFloat(b.textContent) === v);
   });
   updateSlPipsDisplay(v);
+  autoCalcSlTp();
 }
 function updateSlPipsDisplay(v) {
   const el = document.getElementById('sl-pips-display');
@@ -1383,6 +1454,27 @@ function updateSlPipsDisplay(v) {
   } else {
     el.textContent = '✓ ' + v + ' pip' + (v > 1 ? 's' : ''); el.style.color = '#10b981';
   }
+}
+
+// Auto-calcule le prix du SL et le TP à 2RR à partir du prix d'entrée + SL en pips + direction
+function autoCalcSlTp() {
+  const entry = parseFloat(document.getElementById('f-entry').value);
+  if (isNaN(entry) || slPips === null) { calcRR(); return; }
+  const pipValue = 0.0001; // EURUSD : 1 pip = 0.0001
+  const slDistance = slPips * pipValue;
+  const tpDistance = slDistance * 2; // 2RR fixe
+
+  let slPrice, tpPrice;
+  if (direction === 'LONG') {
+    slPrice = entry - slDistance;
+    tpPrice = entry + tpDistance;
+  } else {
+    slPrice = entry + slDistance;
+    tpPrice = entry - tpDistance;
+  }
+  document.getElementById('f-sl').value = slPrice.toFixed(5);
+  document.getElementById('f-tp').value = tpPrice.toFixed(5);
+  calcRR();
 }
 
 function calcRR() {
@@ -1450,6 +1542,7 @@ function submitTrade() {
   };
   trades.unshift(trade);
   localStorage.setItem('trading-trades', JSON.stringify(trades));
+  pushTradeToSheet(trade); // synchro Google Sheet
   const btn = document.getElementById('btn-submit');
   btn.textContent = '✓ Trade enregistré !'; btn.classList.add('saved');
   setTimeout(() => { btn.textContent = 'Enregistrer le trade'; btn.classList.remove('saved'); }, 2000);
@@ -1712,6 +1805,7 @@ function confirmDelete() {
   if (!pendingDeleteId) return;
   trades = trades.filter(t => t.id !== pendingDeleteId);
   localStorage.setItem('trading-trades', JSON.stringify(trades));
+  deleteTradeFromSheet(pendingDeleteId); // synchro Google Sheet
   pendingDeleteId = null;
   document.getElementById('confirm-overlay').classList.remove('visible');
   refreshJournal(); refreshStats(); updateTabBadge(); updateDailyCounter();
