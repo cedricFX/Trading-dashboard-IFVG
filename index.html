@@ -1474,49 +1474,9 @@ function expireTimer() {
   ['second','fvg','ifvg'].forEach(k => lockItem(k));
   document.getElementById('setup-valid').classList.remove('visible');
   updatePositionTab();
-  if (currentMode === 'real') startFomoLock();
-}
-
-// ═══════════════════════════════════
-//  ANTI-FOMO LOCK (réel uniquement)
-// ═══════════════════════════════════
-const FOMO_LOCK_DURATION = 5 * 60; // 5 minutes
-let fomoLockUntil = null;
-let fomoLockInterval = null;
-
-function startFomoLock() {
-  fomoLockUntil = Date.now() + FOMO_LOCK_DURATION * 1000;
-  document.getElementById('btn-reset').disabled = true;
-  document.getElementById('btn-reset').style.opacity = '0.4';
-  document.getElementById('btn-reset').style.cursor = 'not-allowed';
-  clearInterval(fomoLockInterval);
-  fomoLockInterval = setInterval(updateFomoLockUI, 1000);
-  updateFomoLockUI();
-}
-
-function updateFomoLockUI() {
-  const btn = document.getElementById('btn-reset');
-  if (!fomoLockUntil) return;
-  const left = Math.ceil((fomoLockUntil - Date.now()) / 1000);
-  if (left <= 0) {
-    clearInterval(fomoLockInterval);
-    fomoLockUntil = null;
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.cursor = 'pointer';
-    btn.textContent = '↺ Reset';
-    return;
-  }
-  btn.textContent = `🔒 Patience… ${fmtCountdown(left)}`;
-}
-
-function isFomoLocked() {
-  return fomoLockUntil !== null && Date.now() < fomoLockUntil;
 }
 
 function resetAll(force) {
-  if (isFomoLocked() && !force) return; // bloqué par le verrou anti-FOMO
-  clearInterval(fomoLockInterval); fomoLockUntil = null;
   clearInterval(timerInterval); timerState = 'idle';
   remaining = timerDuration;
   checks = {first:false,second:false,fvg:false,ifvg:false}; aplussActive = false; goldenActive = false;
