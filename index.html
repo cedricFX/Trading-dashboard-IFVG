@@ -198,7 +198,9 @@
 
     /* JOURNAL */
     .trade-list { display:flex; flex-direction:column; gap:12px; }
-    .trade-card { padding:16px 20px; border-radius:10px; display:grid; grid-template-columns:auto 1fr auto auto; gap:16px; align-items:center; }
+    .trade-card { padding:16px 20px; border-radius:10px; display:grid; grid-template-columns:auto 1fr auto auto auto; gap:12px; align-items:center; }
+    .edit-btn { background:transparent; border:1px solid #1e293b; color:#475569; cursor:pointer; font-size:14px; padding:5px 10px; border-radius:6px; transition:all 0.15s; font-weight:600; }
+    .edit-btn:hover { border-color:#06b6d4; color:#06b6d4; background:rgba(6,182,212,0.08); }
     .result-badge { padding:4px 10px; border-radius:6px; font-weight:800; font-size:12px; }
     .trade-main { font-size:13px; font-weight:600; color:#e2e8f0; }
     .trade-meta { font-size:11px; color:#475569; margin-top:2px; }
@@ -605,6 +607,91 @@
     </div>
   </div>
 
+  <!-- EXPORT PDF DATE RANGE MODAL -->
+  <div class="overlay" id="export-overlay">
+    <div class="dialog" style="max-width:380px;text-align:left;">
+      <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">📄 Export PDF</div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:18px;">Choisis la période à exporter</div>
+
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="filter-btn export-preset active" onclick="setExportPreset('month')">Ce mois</button>
+        <button class="filter-btn export-preset" onclick="setExportPreset('last30')">30 derniers jours</button>
+        <button class="filter-btn export-preset" onclick="setExportPreset('all')">Tout l'historique</button>
+        <button class="filter-btn export-preset" onclick="setExportPreset('custom')">Personnalisé</button>
+      </div>
+
+      <div id="export-custom-dates" style="display:none;margin-bottom:16px;">
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1;">
+            <div class="field-label">Du</div>
+            <input type="date" id="export-date-from" class="input" oninput="updateExportPreview()" />
+          </div>
+          <div style="flex:1;">
+            <div class="field-label">Au</div>
+            <input type="date" id="export-date-to" class="input" oninput="updateExportPreview()" />
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:12px;color:#475569;margin-bottom:18px;" id="export-range-preview"></div>
+
+      <div class="dialog-btns">
+        <button class="btn-cancel" onclick="closeExportModal()">Annuler</button>
+        <button class="btn-danger" style="background:rgba(6,182,212,0.15);border-color:rgba(6,182,212,0.4);color:#06b6d4;" onclick="runExport()">Générer le PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT TRADE MODAL -->
+  <div class="overlay" id="edit-overlay">
+    <div class="dialog" style="max-width:480px;text-align:left;max-height:85vh;overflow-y:auto;">
+      <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">✏️ Modifier le trade</div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:18px;">Ajoute des infos ou corrige des données après coup</div>
+
+      <div class="form-grid">
+        <div class="field"><div class="field-label">Date</div><input type="date" id="edit-date" class="input" /></div>
+        <div class="field"><div class="field-label">Heure d'entrée</div><input type="time" id="edit-time" class="input" /></div>
+        <div class="field"><div class="field-label">Direction</div>
+          <div class="toggle-group">
+            <button class="toggle-btn" id="edit-btn-long" onclick="setEditDirection('LONG')">▲ LONG</button>
+            <button class="toggle-btn" id="edit-btn-short" onclick="setEditDirection('SHORT')">▼ SHORT</button>
+          </div>
+        </div>
+        <div class="field"><div class="field-label">Résultat</div>
+          <div class="toggle-group">
+            <button class="toggle-btn" id="edit-btn-win" onclick="setEditResult('WIN')">WIN</button>
+            <button class="toggle-btn" id="edit-btn-loss" onclick="setEditResult('LOSS')">LOSS</button>
+            <button class="toggle-btn" id="edit-btn-be" onclick="setEditResult('BE')">BE</button>
+          </div>
+        </div>
+        <div class="field"><div class="field-label">Prix d'entrée</div><input type="number" step="0.00001" id="edit-entry" class="input" /></div>
+        <div class="field"><div class="field-label">Stop Loss (prix)</div><input type="number" step="0.00001" id="edit-sl" class="input" /></div>
+        <div class="field"><div class="field-label">Take Profit</div><input type="number" step="0.00001" id="edit-tp" class="input" /></div>
+        <div class="field"><div class="field-label">RR</div><input type="number" step="0.01" id="edit-rr" class="input" placeholder="2.00" /></div>
+        <div class="field"><div class="field-label">SL (pips)</div><input type="number" step="0.5" min="2" max="8" id="edit-slpips" class="input" /></div>
+        <div class="field"><div class="field-label">FVG (pips)</div><input type="number" step="0.1" min="1.3" max="6" id="edit-fvgsize" class="input" /></div>
+        <div class="field"><div class="field-label">Heure de fin</div><input type="time" id="edit-timeend" class="input" /></div>
+        <div class="field"><div class="field-label">Risque (€)</div><input type="number" step="1" id="edit-riskeur" class="input" /></div>
+        <div class="field full-width" style="margin-top:6px;">
+          <div class="field-label">Lien screenshot</div>
+          <div style="position:relative;">
+            <input type="url" id="edit-screenshot" class="input" placeholder="https://www.tradingview.com/x/..." style="padding-right:80px;" />
+            <button onclick="openEditScreenshot()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 10px;border-radius:6px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4;font-size:11px;font-weight:700;cursor:pointer;">Ouvrir ↗</button>
+          </div>
+        </div>
+        <div class="field full-width mt-14">
+          <div class="field-label">Notes</div>
+          <textarea id="edit-notes" class="input" rows="3" placeholder="Contexte du trade, observations, émotions..."></textarea>
+        </div>
+      </div>
+
+      <div class="dialog-btns" style="margin-top:18px;">
+        <button class="btn-cancel" onclick="closeEditModal()">Annuler</button>
+        <button class="btn-danger" style="background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.4);color:#10b981;" onclick="saveEditTrade()">Enregistrer les modifications</button>
+      </div>
+    </div>
+  </div>
+
   <!-- EMOTIONAL CHECKLIST MODAL (réel uniquement) -->
   <div class="overlay" id="emo-overlay">
     <div class="dialog" style="max-width:380px;text-align:left;">
@@ -725,7 +812,7 @@
         <button class="filter-btn active" id="sf-all" onclick="setStatsFilter('all')">Tous</button>
         <button class="filter-btn" id="sf-backtest" onclick="setStatsFilter('backtest')">🔬 Backtest</button>
         <button class="filter-btn" id="sf-real" onclick="setStatsFilter('real')">🔴 Réel</button>
-        <button class="filter-btn" onclick="exportMonthlyReport()" style="border-color:rgba(6,182,212,0.3);color:#06b6d4;">📄 Export PDF du mois</button>
+        <button class="filter-btn" onclick="openExportModal()" style="border-color:rgba(6,182,212,0.3);color:#06b6d4;">📄 Export PDF</button>
       </div>
     </div>
     <div class="page-sub" id="stats-sub">Aucun trade enregistré pour l'instant</div>
@@ -2563,31 +2650,94 @@ function renderHeatmap(data) {
 }
 
 // ═══════════════════════════════════
-//  EXPORT PDF MENSUEL
+//  EXPORT PDF — plage de dates
 // ═══════════════════════════════════
-function exportMonthlyReport() {
+let exportPreset = 'month';
+
+function openExportModal() {
+  exportPreset = 'month';
+  document.querySelectorAll('.export-preset').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.export-preset')[0].classList.add('active');
+  document.getElementById('export-custom-dates').style.display = 'none';
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('export-date-from').value = today;
+  document.getElementById('export-date-to').value = today;
+  updateExportPreview();
+  document.getElementById('export-overlay').classList.add('visible');
+}
+
+function closeExportModal() {
+  document.getElementById('export-overlay').classList.remove('visible');
+}
+
+function setExportPreset(preset) {
+  exportPreset = preset;
+  document.querySelectorAll('.export-preset').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick') === `setExportPreset('${preset}')`);
+  });
+  document.getElementById('export-custom-dates').style.display = preset === 'custom' ? '' : 'none';
+  updateExportPreview();
+}
+
+function getExportRange() {
+  const now = new Date();
+  if (exportPreset === 'month') {
+    const from = new Date(calYear, calMonth, 1).toISOString().slice(0,10);
+    const to = new Date(calYear, calMonth+1, 0).toISOString().slice(0,10);
+    return { from, to, label: MONTHS_FR[calMonth] + ' ' + calYear };
+  }
+  if (exportPreset === 'last30') {
+    const fromD = new Date(now); fromD.setDate(fromD.getDate() - 30);
+    return { from: fromD.toISOString().slice(0,10), to: now.toISOString().slice(0,10), label: '30 derniers jours' };
+  }
+  if (exportPreset === 'all') {
+    const dates = trades.map(t => t.date).filter(Boolean).sort();
+    if (dates.length === 0) return { from: now.toISOString().slice(0,10), to: now.toISOString().slice(0,10), label: 'Tout l\'historique' };
+    return { from: dates[0], to: dates[dates.length-1], label: 'Tout l\'historique' };
+  }
+  // custom
+  const from = document.getElementById('export-date-from').value;
+  const to = document.getElementById('export-date-to').value;
+  return { from, to, label: from + ' au ' + to };
+}
+
+function updateExportPreview() {
+  const { from, to, label } = getExportRange();
+  let data = trades;
+  if (statsFilter === 'backtest') data = trades.filter(t => t.mode === 'backtest');
+  if (statsFilter === 'real')     data = trades.filter(t => t.mode === 'real');
+  const count = data.filter(t => t.date && t.date >= from && t.date <= to).length;
+  document.getElementById('export-range-preview').textContent =
+    `${count} trade${count>1?'s':''} trouvé${count>1?'s':''} du ${from} au ${to}`;
+}
+
+function runExport() {
+  const { from, to, label } = getExportRange();
+  if (!from || !to) { alert('Choisis une période valide.'); return; }
+  closeExportModal();
+  exportReport(from, to, label);
+}
+
+function exportReport(fromDate, toDate, periodLabel) {
   let data = trades;
   if (statsFilter === 'backtest') data = trades.filter(t => t.mode === 'backtest');
   if (statsFilter === 'real')     data = trades.filter(t => t.mode === 'real');
 
-  const monthTrades = data.filter(t => {
-    if (!t.date) return false;
-    const [y,m] = t.date.split('-').map(Number);
-    return y === calYear && (m-1) === calMonth;
-  }).sort((a,b) => (a.date+' '+(a.time||'')).localeCompare(b.date+' '+(b.time||'')));
+  const rangeTrades = data.filter(t => t.date && t.date >= fromDate && t.date <= toDate)
+    .sort((a,b) => (a.date+' '+(a.time||'')).localeCompare(b.date+' '+(b.time||'')));
 
-  const total = monthTrades.length;
-  const wins = monthTrades.filter(t=>t.result==='WIN').length;
-  const losses = monthTrades.filter(t=>t.result==='LOSS').length;
-  const be = monthTrades.filter(t=>t.result==='BE').length;
+  const total = rangeTrades.length;
+  const wins = rangeTrades.filter(t=>t.result==='WIN').length;
+  const losses = rangeTrades.filter(t=>t.result==='LOSS').length;
+  const be = rangeTrades.filter(t=>t.result==='BE').length;
   const winrate = total > 0 ? (wins/total*100).toFixed(1) : '0';
-  const avgRR = total > 0 ? (monthTrades.reduce((a,t)=>a+(parseFloat(t.rr)||0),0)/total).toFixed(2) : '—';
-  const withRisk = monthTrades.filter(t => tradePnl(t) !== null);
+  const avgRR = total > 0 ? (rangeTrades.reduce((a,t)=>a+(parseFloat(t.rr)||0),0)/total).toFixed(2) : '—';
+  const withRisk = rangeTrades.filter(t => tradePnl(t) !== null);
   const pnlTotal = withRisk.reduce((a,t)=>a+tradePnl(t),0);
-  const aplusCount = monthTrades.filter(t=>t.aplus).length;
-  const goldenCount = monthTrades.filter(t=>t.golden).length;
+  const aplusCount = rangeTrades.filter(t=>t.aplus).length;
+  const goldenCount = rangeTrades.filter(t=>t.golden).length;
 
-  const rows = monthTrades.map(t => {
+  const rows = rangeTrades.map(t => {
     const rc = t.result==='WIN'?'#10b981':t.result==='LOSS'?'#f43f5e':'#f59e0b';
     return `<tr>
       <td>${t.date}</td><td>${t.time||''}</td><td>${t.mode==='real'?'Réel':'Backtest'}</td>
@@ -2599,7 +2749,7 @@ function exportMonthlyReport() {
 
   const html = `
 <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
-<title>Rapport ${MONTHS_FR[calMonth]} ${calYear}</title>
+<title>Rapport ${periodLabel}</title>
 <style>
   body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #1a202c; max-width: 900px; margin: 0 auto; }
   h1 { font-size: 22px; margin-bottom: 4px; }
@@ -2614,8 +2764,8 @@ function exportMonthlyReport() {
   .footer { margin-top: 30px; font-size: 11px; color: #94a3b8; text-align: center; }
   @media print { body { padding: 20px; } }
 </style></head><body>
-  <h1>📊 Rapport de trading — ${MONTHS_FR[calMonth]} ${calYear}</h1>
-  <div class="sub">EURUSD · Liquidity Journal — ${total} trade${total>1?'s':''} (filtre : ${statsFilter==='all'?'tous':statsFilter})</div>
+  <h1>📊 Rapport de trading — ${periodLabel}</h1>
+  <div class="sub">EURUSD · Liquidity Journal — ${total} trade${total>1?'s':''} (filtre : ${statsFilter==='all'?'tous':statsFilter}) — du ${fromDate} au ${toDate}</div>
   <div class="grid">
     <div class="card"><div class="label">Win Rate</div><div class="value" style="color:#0891b2;">${winrate}%</div></div>
     <div class="card"><div class="label">RR Moyen</div><div class="value" style="color:#2563eb;">${avgRR}${avgRR!=='—'?'R':''}</div></div>
@@ -2628,7 +2778,7 @@ function exportMonthlyReport() {
   </div>
   <table>
     <thead><tr><th>Date</th><th>Heure</th><th>Mode</th><th>Sens</th><th>Résultat</th><th>RR</th><th>SL</th><th>Tags</th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="8" style="text-align:center;color:#94a3b8;">Aucun trade ce mois-ci</td></tr>'}</tbody>
+    <tbody>${rows || '<tr><td colspan="8" style="text-align:center;color:#94a3b8;">Aucun trade sur cette période</td></tr>'}</tbody>
   </table>
   <div class="footer">Généré le ${new Date().toLocaleDateString('fr-FR')} — EURUSD Liquidity Journal</div>
 </body></html>`;
@@ -2689,6 +2839,115 @@ function renderBtVsReal() {
 }
 
 // ═══════════════════════════════════
+//  EDIT TRADE
+// ═══════════════════════════════════
+let editingTradeId = null;
+let editDirection = 'LONG';
+let editResult = 'WIN';
+
+function openEditTrade(id) {
+  const t = trades.find(tr => tr.id === id);
+  if (!t) return;
+  editingTradeId = id;
+
+  document.getElementById('edit-date').value = t.date || '';
+  document.getElementById('edit-time').value = t.time || '';
+  document.getElementById('edit-timeend').value = t.timeEnd || '';
+  document.getElementById('edit-entry').value = t.entry || '';
+  document.getElementById('edit-sl').value = t.sl || '';
+  document.getElementById('edit-tp').value = t.tp || '';
+  document.getElementById('edit-rr').value = t.rr || '';
+  document.getElementById('edit-slpips').value = t.slPips || '';
+  document.getElementById('edit-fvgsize').value = t.fvgSize || '';
+  document.getElementById('edit-riskeur').value = t.riskEur || '';
+  document.getElementById('edit-screenshot').value = t.screenshot || '';
+  document.getElementById('edit-notes').value = t.notes || '';
+
+  setEditDirection(t.direction || 'LONG');
+  setEditResult(t.result || 'WIN');
+
+  document.getElementById('edit-overlay').classList.add('visible');
+}
+
+function closeEditModal() {
+  editingTradeId = null;
+  document.getElementById('edit-overlay').classList.remove('visible');
+}
+
+function setEditDirection(d) {
+  editDirection = d;
+  document.getElementById('edit-btn-long').className = 'toggle-btn'+(d==='LONG'?' active-long':'');
+  document.getElementById('edit-btn-short').className = 'toggle-btn'+(d==='SHORT'?' active-short':'');
+}
+function setEditResult(r) {
+  editResult = r;
+  document.getElementById('edit-btn-win').className = 'toggle-btn'+(r==='WIN'?' active-win':'');
+  document.getElementById('edit-btn-loss').className = 'toggle-btn'+(r==='LOSS'?' active-loss':'');
+  document.getElementById('edit-btn-be').className = 'toggle-btn'+(r==='BE'?' active-be':'');
+}
+
+function openEditScreenshot() {
+  const url = document.getElementById('edit-screenshot').value;
+  if (url) window.open(url, '_blank');
+}
+
+function saveEditTrade() {
+  if (!editingTradeId) return;
+  const idx = trades.findIndex(t => t.id === editingTradeId);
+  if (idx === -1) return;
+
+  const updated = {
+    ...trades[idx],
+    date: document.getElementById('edit-date').value,
+    time: document.getElementById('edit-time').value,
+    timeEnd: document.getElementById('edit-timeend').value,
+    direction: editDirection,
+    result: editResult,
+    entry: document.getElementById('edit-entry').value,
+    sl: document.getElementById('edit-sl').value,
+    tp: document.getElementById('edit-tp').value,
+    rr: document.getElementById('edit-rr').value,
+    slPips: document.getElementById('edit-slpips').value ? parseFloat(document.getElementById('edit-slpips').value) : null,
+    fvgSize: document.getElementById('edit-fvgsize').value ? parseFloat(document.getElementById('edit-fvgsize').value) : null,
+    riskEur: document.getElementById('edit-riskeur').value ? parseFloat(document.getElementById('edit-riskeur').value) : null,
+    screenshot: document.getElementById('edit-screenshot').value,
+    notes: document.getElementById('edit-notes').value,
+  };
+
+  // Recalculate duration if both times are set
+  if (updated.time && updated.timeEnd) {
+    const [sh,sm] = updated.time.split(':').map(Number);
+    const [eh,em] = updated.timeEnd.split(':').map(Number);
+    let diff = (eh*60+em) - (sh*60+sm);
+    if (diff < 0) diff += 24*60;
+    updated.duration = diff;
+  }
+
+  trades[idx] = updated;
+  localStorage.setItem('trading-trades', JSON.stringify(trades));
+  pushTradeUpdateToSheet(updated); // synchro Google Sheet
+
+  closeEditModal();
+  refreshJournal();
+  refreshStats();
+  updateTabBadge();
+  updateDailyCounter();
+}
+
+async function pushTradeUpdateToSheet(trade) {
+  updateSyncBadge('syncing');
+  try {
+    await fetch(SHEET_URL + '?action=update', {
+      method: 'POST',
+      body: JSON.stringify({ trade })
+    });
+    updateSyncBadge('ok');
+  } catch (err) {
+    updateSyncBadge('error');
+  }
+}
+
+// ═══════════════════════════════════
 //  JOURNAL
 // ═══════════════════════════════════
 function setJournalFilter(f) {
@@ -2740,6 +2999,7 @@ function refreshJournal() {
         <div style="margin-top:4px;">${screenshotTag(t)}</div>
       </div>
       <div style="font-size:10px;color:#334155;text-align:right;">${Object.values(t.checklist||{}).filter(Boolean).length}/4 ✓</div>
+      <button class="edit-btn" onclick="openEditTrade(${t.id})">✏️ Modifier</button>
       <button class="delete-btn" onclick="askDelete(${t.id})">🗑️ Suppr.</button>
     </div>`).join('');
 }
