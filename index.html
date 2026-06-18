@@ -631,6 +631,12 @@
             <div style="font-size:10px;color:#475569;margin-top:3px;line-height:1.5;">
               💡 SL sous/au-dessus du FVG inversé ET de la bougie qui l'a inversé · attends ~1 min de réaction dans ton sens avant d'entrer · vérifie que le DXY est en miroir (FVG + retest symétrique)
             </div>
+            <div id="sl-reminder-wrap" style="margin-top:8px;padding:8px 10px;border-radius:7px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);" onclick="event.stopPropagation()">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:11px;color:#f59e0b;font-weight:600;">
+                <input type="checkbox" id="sl-reminder-check" onchange="onSlReminderToggle()" style="width:16px;height:16px;cursor:pointer;accent-color:#f59e0b;" />
+                ⚠️ SL bien placé (sous/sur FVG + bougie) ET passage en 1 min vérifié
+              </label>
+            </div>
           </div>
           <div class="lock-icon" id="lock-ifvg">🔒</div>
         </div>
@@ -715,10 +721,24 @@
         <div class="field"><div class="field-label">Heure de fin</div><input type="time" id="edit-timeend" class="input" /></div>
         <div class="field"><div class="field-label">Risque (€)</div><input type="number" step="1" id="edit-riskeur" class="input" /></div>
         <div class="field full-width" style="margin-top:6px;">
-          <div class="field-label">Lien screenshot</div>
+          <div class="field-label">Lien screenshot 1</div>
           <div style="position:relative;">
             <input type="url" id="edit-screenshot" class="input" placeholder="https://www.tradingview.com/x/..." style="padding-right:80px;" />
             <button onclick="openEditScreenshot()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 10px;border-radius:6px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4;font-size:11px;font-weight:700;cursor:pointer;">Ouvrir ↗</button>
+          </div>
+        </div>
+        <div class="field full-width" style="margin-top:10px;">
+          <div class="field-label">Lien screenshot 2 <span style="color:#475569;font-weight:400;text-transform:none;letter-spacing:0;">(optionnel)</span></div>
+          <div style="position:relative;">
+            <input type="url" id="edit-screenshot2" class="input" placeholder="https://www.tradingview.com/x/..." style="padding-right:80px;" />
+            <button onclick="openEditScreenshot2()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 10px;border-radius:6px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4;font-size:11px;font-weight:700;cursor:pointer;">Ouvrir ↗</button>
+          </div>
+        </div>
+        <div class="field full-width" style="margin-top:10px;">
+          <div class="field-label">Lien screenshot 3 <span style="color:#475569;font-weight:400;text-transform:none;letter-spacing:0;">(optionnel)</span></div>
+          <div style="position:relative;">
+            <input type="url" id="edit-screenshot3" class="input" placeholder="https://www.tradingview.com/x/..." style="padding-right:80px;" />
+            <button onclick="openEditScreenshot3()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 10px;border-radius:6px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4;font-size:11px;font-weight:700;cursor:pointer;">Ouvrir ↗</button>
           </div>
         </div>
         <div class="field full-width mt-14">
@@ -833,10 +853,28 @@
 
       <!-- Screenshot -->
       <div class="field full-width" style="margin-top:6px;">
-        <div class="field-label">Lien screenshot</div>
+        <div class="field-label">Lien screenshot 1</div>
         <div style="position:relative;">
           <input type="url" id="f-screenshot" class="input" placeholder="https://www.tradingview.com/x/..." style="padding-right:80px;" />
           <button onclick="openScreenshot()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 10px;border-radius:6px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4;font-size:11px;font-weight:700;cursor:pointer;">Ouvrir ↗</button>
+        </div>
+      </div>
+
+      <!-- Screenshot 2 -->
+      <div class="field full-width" style="margin-top:10px;">
+        <div class="field-label">Lien screenshot 2 <span style="color:#475569;font-weight:400;text-transform:none;letter-spacing:0;">(optionnel)</span></div>
+        <div style="position:relative;">
+          <input type="url" id="f-screenshot2" class="input" placeholder="https://www.tradingview.com/x/..." style="padding-right:80px;" />
+          <button onclick="openScreenshot2()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 10px;border-radius:6px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4;font-size:11px;font-weight:700;cursor:pointer;">Ouvrir ↗</button>
+        </div>
+      </div>
+
+      <!-- Screenshot 3 -->
+      <div class="field full-width" style="margin-top:10px;">
+        <div class="field-label">Lien screenshot 3 <span style="color:#475569;font-weight:400;text-transform:none;letter-spacing:0;">(optionnel)</span></div>
+        <div style="position:relative;">
+          <input type="url" id="f-screenshot3" class="input" placeholder="https://www.tradingview.com/x/..." style="padding-right:80px;" />
+          <button onclick="openScreenshot3()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 10px;border-radius:6px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:#06b6d4;font-size:11px;font-weight:700;cursor:pointer;">Ouvrir ↗</button>
         </div>
       </div>
 
@@ -1676,6 +1714,8 @@ function resetAll(force) {
   clearInterval(timerInterval); timerState = 'idle';
   stopFvgWindow();
   remaining = timerDuration;
+  document.getElementById('sl-reminder-check').checked = false;
+  onSlReminderToggle();
   checks = {first:false,second:false,fvg:false,ifvg:false}; aplussActive = false; goldenActive = false;
   // First item
   document.getElementById('item-first').classList.remove('expired-item','checked');
@@ -1737,6 +1777,14 @@ function lockItem(key) {
 //  CHECKLIST
 // ═══════════════════════════════════
 const ORDER = ['first','second','fvg','ifvg'];
+
+function onSlReminderToggle() {
+  const check = document.getElementById('sl-reminder-check');
+  const wrap = document.getElementById('sl-reminder-wrap');
+  wrap.style.background = check.checked ? 'rgba(16,185,129,0.08)' : 'rgba(245,158,11,0.06)';
+  wrap.style.borderColor = check.checked ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.2)';
+  wrap.querySelector('label').style.color = check.checked ? '#10b981' : '#f59e0b';
+}
 
 function toggleCheck(key) {
   if (timerState === 'expired' || key === 'first') return;
@@ -2357,6 +2405,14 @@ function openScreenshot() {
   const url = document.getElementById('f-screenshot').value;
   if (url) window.open(url, '_blank');
 }
+function openScreenshot2() {
+  const url = document.getElementById('f-screenshot2').value;
+  if (url) window.open(url, '_blank');
+}
+function openScreenshot3() {
+  const url = document.getElementById('f-screenshot3').value;
+  if (url) window.open(url, '_blank');
+}
 
 function submitTrade() {
   if (!document.getElementById('f-entry').value) { document.getElementById('f-entry').focus(); return; }
@@ -2389,6 +2445,8 @@ function submitTrade() {
       ? +((parseFloat(document.getElementById('lot-capital').value)||10000) * (currentRisk/100)).toFixed(2)
       : null,
     screenshot: document.getElementById('f-screenshot').value,
+    screenshot2: document.getElementById('f-screenshot2').value,
+    screenshot3: document.getElementById('f-screenshot3').value,
     notes: document.getElementById('f-notes').value,
     aplus: aplussActive,
     golden: goldenActive,
@@ -2410,6 +2468,8 @@ function submitTrade() {
   document.getElementById('f-sl').value = '';
   document.getElementById('f-tp').value = '';
   document.getElementById('f-screenshot').value = '';
+  document.getElementById('f-screenshot2').value = '';
+  document.getElementById('f-screenshot3').value = '';
   document.getElementById('f-notes').value = '';
   document.getElementById('f-sl-pips').value = '';
   document.getElementById('sl-pips-display').textContent = '';
@@ -3061,6 +3121,8 @@ function openEditTrade(id) {
   document.getElementById('edit-fvgsize').value = t.fvgSize || '';
   document.getElementById('edit-riskeur').value = t.riskEur || '';
   document.getElementById('edit-screenshot').value = t.screenshot || '';
+  document.getElementById('edit-screenshot2').value = t.screenshot2 || '';
+  document.getElementById('edit-screenshot3').value = t.screenshot3 || '';
   document.getElementById('edit-notes').value = t.notes || '';
 
   setEditDirection(t.direction || 'LONG');
@@ -3090,6 +3152,14 @@ function openEditScreenshot() {
   const url = document.getElementById('edit-screenshot').value;
   if (url) window.open(url, '_blank');
 }
+function openEditScreenshot2() {
+  const url = document.getElementById('edit-screenshot2').value;
+  if (url) window.open(url, '_blank');
+}
+function openEditScreenshot3() {
+  const url = document.getElementById('edit-screenshot3').value;
+  if (url) window.open(url, '_blank');
+}
 
 function saveEditTrade() {
   if (!editingTradeId) return;
@@ -3111,6 +3181,8 @@ function saveEditTrade() {
     fvgSize: document.getElementById('edit-fvgsize').value ? parseFloat(document.getElementById('edit-fvgsize').value) : null,
     riskEur: document.getElementById('edit-riskeur').value ? parseFloat(document.getElementById('edit-riskeur').value) : null,
     screenshot: document.getElementById('edit-screenshot').value,
+    screenshot2: document.getElementById('edit-screenshot2').value,
+    screenshot3: document.getElementById('edit-screenshot3').value,
     notes: document.getElementById('edit-notes').value,
   };
 
