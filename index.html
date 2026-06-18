@@ -566,12 +566,17 @@
 
           <!-- LOT SIZE CALCULATOR -->
           <div id="lot-calc" style="display:none;margin-top:14px;padding:14px 16px;border-radius:10px;border:1px solid rgba(16,185,129,0.2);background:rgba(16,185,129,0.04);">
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
-              <div style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:0.06em;">💰 Calculateur de lot</div>
+            <div style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">💰 Calculateur de lot</div>
+
+            <!-- Capital — mis en avant pour ne pas l'oublier -->
+            <div style="margin-bottom:14px;padding:10px 14px;border-radius:9px;background:rgba(251,191,36,0.08);border:1.5px solid rgba(251,191,36,0.35);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
               <div style="display:flex;align-items:center;gap:8px;">
-                <span style="font-size:11px;color:#475569;">Capital</span>
-                <input type="number" id="lot-capital" class="input" style="width:90px;height:30px;padding:4px 8px;font-size:12px;" value="10000" step="100" oninput="calcLotSize()" />
-                <span style="font-size:11px;color:#475569;">€</span>
+                <span style="font-size:16px;">💼</span>
+                <span style="font-size:13px;font-weight:700;color:#fbbf24;">Capital du compte</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="number" id="lot-capital" class="input" style="width:140px;height:42px;padding:6px 10px;font-size:17px;font-weight:700;color:#fbbf24;border-color:rgba(251,191,36,0.4);" value="10000" step="100" oninput="calcLotSize()" />
+                <span style="font-size:15px;font-weight:700;color:#fbbf24;">€</span>
               </div>
             </div>
 
