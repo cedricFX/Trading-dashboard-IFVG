@@ -2582,7 +2582,11 @@ function showCalDetail(d, dayTrades) {
     const rc = t.result==='WIN'?'#10b981':t.result==='LOSS'?'#f43f5e':'#f59e0b';
     const dc = t.direction==='LONG'?'#10b981':'#f43f5e';
     const dur = t.duration ? ` · ⏱ ${Math.floor(t.duration/60)>0?Math.floor(t.duration/60)+'h'+String(t.duration%60).padStart(2,'0'):t.duration%60+'min'}` : '';
-    const sc = t.screenshot ? `<a href="${t.screenshot}" target="_blank" style="color:#06b6d4;font-size:11px;text-decoration:none;">📸 ↗</a> ` : '';
+    const sc = [
+      t.screenshot ? `<a href="${t.screenshot}" target="_blank" style="color:#06b6d4;font-size:11px;text-decoration:none;">📸1 ↗</a>` : '',
+      t.screenshot2 ? `<a href="${t.screenshot2}" target="_blank" style="color:#06b6d4;font-size:11px;text-decoration:none;">📸2 ↗</a>` : '',
+      t.screenshot3 ? `<a href="${t.screenshot3}" target="_blank" style="color:#06b6d4;font-size:11px;text-decoration:none;">📸3 ↗</a>` : '',
+    ].filter(Boolean).join(' ');
     return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
       <span style="padding:3px 8px;border-radius:5px;background:${rc}22;color:${rc};font-weight:800;font-size:11px;">${t.result}</span>
       <span style="font-size:12px;color:${dc};font-weight:700;">${t.direction}</span>
@@ -3247,7 +3251,11 @@ function refreshJournal() {
     : '<span class="mode-tag mode-tag-bt">BACKTEST</span>';
   const apluspTag = t => t.aplus ? '<span style="font-size:11px;color:#a78bfa;font-weight:700;margin-left:6px;">⭐ A++</span>' : '';
   const goldenTag = t => t.golden ? '<span style="font-size:11px;color:#fbbf24;font-weight:700;margin-left:6px;">⚡ GOLDEN</span>' : '';
-  const screenshotTag = t => t.screenshot ? `<a href="${t.screenshot}" target="_blank" style="font-size:11px;color:#06b6d4;font-weight:600;margin-left:6px;text-decoration:none;">📸 Screenshot ↗</a>` : '';
+  const screenshotTag = t => [
+    t.screenshot ? `<a href="${t.screenshot}" target="_blank" style="font-size:11px;color:#06b6d4;font-weight:600;margin-left:6px;text-decoration:none;">📸1 ↗</a>` : '',
+    t.screenshot2 ? `<a href="${t.screenshot2}" target="_blank" style="font-size:11px;color:#06b6d4;font-weight:600;margin-left:6px;text-decoration:none;">📸2 ↗</a>` : '',
+    t.screenshot3 ? `<a href="${t.screenshot3}" target="_blank" style="font-size:11px;color:#06b6d4;font-weight:600;margin-left:6px;text-decoration:none;">📸3 ↗</a>` : '',
+  ].filter(Boolean).join('');
   const durationStr = t => {
     if (!t.duration) return '';
     const d = parseInt(t.duration);
