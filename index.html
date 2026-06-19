@@ -361,6 +361,11 @@
         📰 ForexFactory <span style="font-size:10px;">↗</span>
       </a>
 
+      <!-- GOOGLE SHEET CONFIG BUTTON -->
+      <button onclick="openSetupModal()" id="sheet-config-btn" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);color:#94a3b8;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='rgba(16,185,129,0.4)';this.style.color='#10b981';" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.color='#94a3b8';">
+        🔗 <span id="sheet-config-label">Connecter mon Sheet</span>
+      </button>
+
       <div class="mode-toggle" id="mode-toggle">
         <button class="mode-btn active-bt" id="btn-bt" onclick="setMode('backtest')">🔬 BACKTEST</button>
         <button class="mode-btn" id="btn-real" onclick="setMode('real')">🔴 RÉEL</button>
@@ -657,6 +662,52 @@
         <div style="font-size:12px;color:#64748b;margin-top:2px;">Tu peux accéder à la prise de position</div>
       </div>
       <button class="btn btn-primary" onclick="goToPosition()">Enregistrer →</button>
+    </div>
+  </div>
+
+  <!-- GOOGLE SHEET SETUP MODAL -->
+  <div class="overlay" id="setup-overlay">
+    <div class="dialog" style="max-width:480px;text-align:left;max-height:85vh;overflow-y:auto;">
+      <div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">🔗 Connecte ton Google Sheet</div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:18px;">Pour sauvegarder tes trades et y accéder depuis tous tes appareils, connecte ton propre Google Sheet (gratuit, 5 minutes, une seule fois).</div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:18px;">
+        <div style="padding:12px 14px;border-radius:9px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.2);">
+          <div style="font-size:12px;font-weight:700;color:#06b6d4;margin-bottom:6px;">Étape 1 — Crée ton Google Sheet</div>
+          <div style="font-size:12px;color:#94a3b8;line-height:1.6;">
+            Va sur <a href="https://sheets.google.com" target="_blank" style="color:#06b6d4;">sheets.google.com</a>, crée une feuille vierge. Le nom n'a pas d'importance.
+          </div>
+        </div>
+
+        <div style="padding:12px 14px;border-radius:9px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.2);">
+          <div style="font-size:12px;font-weight:700;color:#06b6d4;margin-bottom:6px;">Étape 2 — Ajoute le script</div>
+          <div style="font-size:12px;color:#94a3b8;line-height:1.6;">
+            Dans ta feuille : <strong style="color:#cbd5e1;">Extensions → Apps Script</strong>. Efface tout le code présent, colle le script fourni à côté de ce dashboard (fichier <code style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:4px;">apps-script-code.gs</code>). Sauvegarde (Ctrl+S).
+          </div>
+        </div>
+
+        <div style="padding:12px 14px;border-radius:9px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.2);">
+          <div style="font-size:12px;font-weight:700;color:#06b6d4;margin-bottom:6px;">Étape 3 — Déploie en application web</div>
+          <div style="font-size:12px;color:#94a3b8;line-height:1.6;">
+            Clique sur <strong style="color:#cbd5e1;">Déployer → Nouveau déploiement</strong>. Type : <strong style="color:#cbd5e1;">Application Web</strong>. Exécuter en tant que : <strong style="color:#cbd5e1;">Moi</strong>. Accès : <strong style="color:#cbd5e1;">Tout le monde</strong>. Clique Déployer, autorise l'accès si demandé, puis copie l'URL qui se termine par <code style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:4px;">/exec</code>.
+          </div>
+        </div>
+
+        <div style="padding:12px 14px;border-radius:9px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.25);">
+          <div style="font-size:12px;font-weight:700;color:#10b981;margin-bottom:8px;">Étape 4 — Colle ton URL ici</div>
+          <input type="url" id="setup-url-input" class="input" placeholder="https://script.google.com/macros/s/.../exec" style="margin-bottom:8px;" />
+          <div id="setup-url-feedback" style="font-size:11px;color:#475569;"></div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:#475569;margin-bottom:16px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.02);">
+        ℹ️ Tes données restent privées, dans TON Google Sheet personnel — elles ne sont jamais partagées avec les autres utilisateurs du dashboard.
+      </div>
+
+      <div class="dialog-btns">
+        <button class="btn-cancel" onclick="skipSetup()">Plus tard (mode local uniquement)</button>
+        <button class="btn-danger" style="background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.4);color:#10b981;" onclick="saveSetupUrl()">Connecter</button>
+      </div>
     </div>
   </div>
 
@@ -1067,8 +1118,63 @@
 // ═══════════════════════════════════
 //  GOOGLE SHEET SYNC
 // ═══════════════════════════════════
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxaGd1hkMonRb1GsJVjRkZwLgp8tuiWsuRQd67gpm0SpQn_Phqs0cBXNVGocbX2cju7/exec';
+// Chaque utilisateur doit connecter SON PROPRE Google Sheet — voir l'écran
+// de configuration au premier lancement (setupSheetUrl/openSetupModal).
+let SHEET_URL = localStorage.getItem('sheet-url') || '';
 let syncStatus = 'idle'; // idle | syncing | ok | error
+
+// ═══════════════════════════════════
+//  CONFIGURATION GOOGLE SHEET (première utilisation)
+// ═══════════════════════════════════
+function openSetupModal() {
+  document.getElementById('setup-url-input').value = SHEET_URL || '';
+  document.getElementById('setup-url-feedback').textContent = '';
+  document.getElementById('setup-overlay').classList.add('visible');
+}
+
+function updateSheetConfigButton() {
+  const label = document.getElementById('sheet-config-label');
+  if (!label) return;
+  label.textContent = SHEET_URL ? 'Sheet connecté' : 'Connecter mon Sheet';
+}
+
+function skipSetup() {
+  document.getElementById('setup-overlay').classList.remove('visible');
+  localStorage.setItem('sheet-setup-dismissed', 'true');
+}
+
+function saveSetupUrl() {
+  const input = document.getElementById('setup-url-input');
+  const feedback = document.getElementById('setup-url-feedback');
+  const url = input.value.trim();
+
+  if (!url) {
+    feedback.textContent = '⚠️ Colle ton URL pour continuer, ou clique "Plus tard".';
+    feedback.style.color = '#f59e0b';
+    return;
+  }
+  if (!url.startsWith('https://script.google.com/macros/') || !url.endsWith('/exec')) {
+    feedback.textContent = '⚠️ Cette URL ne ressemble pas à une URL de déploiement Apps Script valide (doit commencer par https://script.google.com/macros/ et finir par /exec).';
+    feedback.style.color = '#f43f5e';
+    return;
+  }
+
+  SHEET_URL = url;
+  localStorage.setItem('sheet-url', url);
+  localStorage.removeItem('sheet-setup-dismissed');
+  document.getElementById('setup-overlay').classList.remove('visible');
+  updateSheetConfigButton();
+  fetchTradesFromSheet();
+}
+
+// Ouvre automatiquement la configuration au premier lancement, sauf si l'utilisateur
+// a déjà choisi "Plus tard" ou a déjà une URL configurée.
+function maybeShowSetupOnLoad() {
+  updateSheetConfigButton();
+  if (!SHEET_URL && localStorage.getItem('sheet-setup-dismissed') !== 'true') {
+    openSetupModal();
+  }
+}
 
 function updateSyncBadge(status) {
   syncStatus = status;
@@ -1081,6 +1187,7 @@ function updateSyncBadge(status) {
 }
 
 async function fetchTradesFromSheet() {
+  if (!SHEET_URL) { updateSyncBadge('idle'); return; }
   updateSyncBadge('syncing');
   try {
     const res = await fetch(SHEET_URL + '?action=getAll');
@@ -1126,6 +1233,7 @@ function normalizeTime(val) {
 }
 
 async function pushTradeToSheet(trade) {
+  if (!SHEET_URL) return;
   updateSyncBadge('syncing');
   try {
     await fetch(SHEET_URL + '?action=add', {
@@ -1139,6 +1247,7 @@ async function pushTradeToSheet(trade) {
 }
 
 async function deleteTradeFromSheet(id) {
+  if (!SHEET_URL) return;
   updateSyncBadge('syncing');
   try {
     await fetch(SHEET_URL + '?action=delete', {
@@ -1186,6 +1295,7 @@ window.addEventListener('DOMContentLoaded', () => {
   refreshJournal();
   updateTabBadge();
   fetchTradesFromSheet(); // sync depuis Google Sheet au chargement
+  maybeShowSetupOnLoad(); // invite à connecter son Sheet si pas encore fait
 });
 
 // ═══════════════════════════════════
@@ -3216,6 +3326,7 @@ function saveEditTrade() {
 }
 
 async function pushTradeUpdateToSheet(trade) {
+  if (!SHEET_URL) return;
   updateSyncBadge('syncing');
   try {
     await fetch(SHEET_URL + '?action=update', {
