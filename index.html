@@ -1281,6 +1281,17 @@ function offsetTime(date, offsetMin) {
   const d = new Date(date.getTime() + offsetMin*60000);
   return fmt2(d.getHours())+':'+fmt2(d.getMinutes());
 }
+// Retourne l'heure HH:MM dans le fuseau IANA donné, en gérant automatiquement
+// l'heure d'été/hiver propre à CHAQUE région (Europe et US ne basculent pas
+// aux mêmes dates, donc un calcul manuel d'offset n'est pas fiable toute l'année).
+function tzTime(date, timeZone) {
+  const parts = new Intl.DateTimeFormat('fr-FR', {
+    timeZone, hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(date);
+  const h = parts.find(p => p.type === 'hour').value;
+  const m = parts.find(p => p.type === 'minute').value;
+  return h + ':' + m;
+}
 
 function updateClock() {
   const now = new Date();
@@ -1292,11 +1303,10 @@ function updateClock() {
   const warning = document.getElementById('session-warning');
   document.getElementById('clock-time').textContent = timeStr;
 
-  // World clocks (Paris is local)
-  const londonOffMin = isDST(now) ? 0 : -60;
-  const nyOffMin = isDST(now) ? -5*60 : -6*60;
-  const londonStr = offsetTime(now, londonOffMin);
-  const nyStr = offsetTime(now, nyOffMin);
+  // World clocks — calcul via Intl.DateTimeFormat avec les vrais fuseaux IANA,
+  // fiable même si les dates de bascule heure d'été diffèrent entre l'Europe et les US.
+  const londonStr = tzTime(now, 'Europe/London');
+  const nyStr = tzTime(now, 'America/New_York');
   document.getElementById('wc-paris').textContent  = fmt2(h)+':'+fmt2(m);
   document.getElementById('wc-london').textContent = londonStr;
   document.getElementById('wc-ny').textContent     = nyStr;
