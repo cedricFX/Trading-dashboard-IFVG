@@ -1095,6 +1095,9 @@ async function fetchTradesFromSheet() {
         timeEnd: normalizeTime(t.timeEnd),
         aplus: t.aplus === true || t.aplus === 'TRUE' || t.aplus === 'true',
         golden: t.golden === true || t.golden === 'TRUE' || t.golden === 'true',
+        checklist: typeof t.checklist === 'string'
+          ? (() => { try { return JSON.parse(t.checklist); } catch(e) { return {}; } })()
+          : (t.checklist || {}),
       }));
       localStorage.setItem('trading-trades', JSON.stringify(trades));
       updateSyncBadge('ok');
